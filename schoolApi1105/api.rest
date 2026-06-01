@@ -1,0 +1,879 @@
+###session
+
+### ADD SESSION
+POST http://192.168.1.6:8000/api/add_session
+Content-Type: application/json
+
+{
+ "session_name": "2026-27",
+  "start_date": "2026-04-01",
+  "end_date": "2027-03-31",
+  "display_order": 1,
+  "session_status": "Active",
+  "school_id": 12
+}
+
+
+### 1. GET SESSION BY SCHOOL ID
+GET http://192.168.1.6:8000/api/session/12
+Content-Type: application/json
+
+
+### 2. UPDATE SESSION
+PUT http://192.168.1.6:8000/api/update_session/1
+Content-Type: application/json
+
+{
+  "session_name": "2025-26",
+  "status": "Active"
+}
+
+
+### 3. DELETE SESSION (SOFT DELETE)
+DELETE http://192.168.1.6:8000/api/delete_session/1
+Content-Type: application/json
+
+{
+  "delete_status": "delete"
+}
+
+
+
+
+###session
+
+### ADD SESSION
+POST http://192.168.1.3:8000/api/add_medium
+Content-Type: application/json
+
+{
+ "medium": "Franshishi",
+  "display_order": 1,
+  "school_id": 12
+}
+
+
+### 1. GET SESSION BY SCHOOL ID
+GET http://192.168.1.3:8000/api/medium/12
+Content-Type: application/json
+
+
+### 2. UPDATE SESSION
+PUT http://192.168.1.3:8000/api/update_medium/5
+Content-Type: application/json
+
+{
+  "medium": "French"
+}
+
+
+
+### 3. DELETE SESSION (SOFT DELETE)
+DELETE http://192.168.1.3:8000/api/delete_medium/7
+Content-Type: application/json
+
+{
+  "delete_status": "delete"
+}
+
+
+
+
+
+###
+GET https://appedu.egyanpath.com/api/class_detail/11
+
+###
+GET http://localhost:8000/api/class_detail/1
+
+###
+GET http://192.168.1.6:8000/api/feehead/2
+
+
+###
+POST http://192.168.1.6:8000/api/add_feehead
+Content-Type: application/json
+
+{
+    "feehead": "Tuition Feess",
+  "display_order": 1,
+  "school_id": 12,
+  "feehead_date": "2026-04-01"
+}
+
+###
+GET http://192.168.1.6:8000/api/feehead/12
+
+
+
+
+###
+PUT http://192.168.1.6:8000/api/update_feehead/37
+Content-Type: application/json
+
+ {
+  "feehead": "Updated Tuition Fee"
+}
+
+
+
+
+###
+POST http://192.168.1.6:8000/api/add_classfee
+Content-Type: application/json
+
+{
+  "class_id": 18,
+  "session_id" :1,
+  "feehead_id": 38,
+  "date": "2026-04-25",
+  "display_order": 2,
+  "school_id": 12,
+  "amount": 8900,
+  "status": "Active"
+}
+
+###
+GET http://192.168.1.8:8000/api/classfee/12/1/138
+
+
+###
+GET http://192.168.1.8:8000/api/classfee_all/12/43
+
+
+###
+PUT http://192.168.1.6:8000/api/update_classfee/107
+Content-Type: application/json
+
+ {
+      "amount" :"3000"
+}
+
+
+###
+DELETE http://192.168.1.6:8000/api/delete_classfee/5
+
+ {
+    "delete_status":"delete"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###
+POST http://192.168.1.11:8000/api/add_subject_group
+Content-Type: application/json
+
+{
+  "subject_ids": "1,2,3",
+  "group_name": "Science-rtyu",
+  "display_order": 1,
+  "school_id": 12
+}
+
+
+###
+GET http://192.168.1.6:8000/api/subject_group/12
+Content-Type: application/json
+
+
+###
+PUT http://192.168.1.8:8000/api/update_subject_group/3
+Content-Type: application/json
+
+{
+  "subject_ids": [1],
+  "group_name": "Science-r"
+  
+}
+
+
+
+
+###
+DELETE  http://192.168.1.8:8000/api/delete_subject_group/1
+Content-Type: application/json
+
+{
+  "subject_id": 1,
+  "group_name": "Science-A",
+  "display_order": 1,
+  "school_id": 12
+}
+
+
+###
+PUT   http://192.168.1.8:8000/api/status_subject_group/1
+Content-Type: application/json
+
+
+###
+POST http://192.168.1.8:8000/api/add_grade
+Content-Type: application/json
+
+
+{
+  "grade_name": "X",
+  "from_percent": 80,
+  "to_percent": 100,
+  "remark": "Excellent",
+  "display_order": 1,
+  "school_id": 12
+}
+
+###
+GET http://192.168.1.8:8000/api/grade/12
+
+
+###
+PUT http://192.168.1.8:8000/api/update_grade/5
+Content-Type: application/json
+
+{
+  "grade_name": "B"
+
+}
+
+
+###
+
+
+DELETE  http://192.168.1.8:8000/api/delete_grade/5
+
+
+###
+PUT  http://192.168.1.8:8000/api/status_grade/5
+Content-Type: application/json
+
+{"status": "Inactive"}
+
+
+
+
+
+###
+POST http://192.168.1.8:8000/api/add_division
+Content-Type: application/json
+
+{
+  "division": "1st",
+  "from_percent": 80,
+  "to_percent": 100,
+  "remark": "Excellent",
+  "display_order": 1,
+  "school_id": 12
+}
+
+
+
+###
+GET http://192.168.1.7:8000/api/division/12
+
+
+
+
+###
+PUT http://192.168.1.8:8000/api/update_division/1
+Content-Type: application/json
+
+{
+  "division": "11th"
+}
+
+
+
+###
+DELETE  http://192.168.1.7:8000/api/delete_division/1
+
+
+
+###
+PUT  http://192.168.1.7:8000/api/status_division/1
+Content-Type: application/json
+
+{"status": "Inactive"}
+
+
+
+//class test
+###
+POST http://192.168.1.7:8000/api/add_class_test
+Content-Type: application/json
+
+{
+  "test_name": "Unit Test 2",
+  "display_order": 1,
+  "school_id": 12,
+  "session_id":1,
+  "test_date": "2026-03-26"
+}
+
+
+
+###
+GET http://localhost:8000/api/class_test/12/1
+
+
+
+###
+PUT http://192.168.1.7:8000/api/update_class_test/3
+Content-Type: application/json
+
+{
+  "test_name": "2nd test"
+}
+
+
+
+###
+DELETE  http://192.168.1.7:8000/api/delete_class_test/2
+
+
+
+###
+PUT  http://192.168.1.7:8000/api/status_class_test/3
+Content-Type: application/json
+
+{"status": "Inactive"}
+
+
+
+
+
+
+//main exam
+###
+POST http://192.168.1.7:8000/api/add_main_exam
+Content-Type: application/json
+
+{
+  "exam_name": "Uni8",
+  "display_order": 1,
+  "session_id": 1,
+  "school_id": 12,
+  "exam_date": "2026-03-26"
+}
+
+
+###
+GET http://192.168.1.7:8000/api/main_exam/12/1
+
+
+###
+PUT http://192.168.1.7:8000/api/update_main_exam/1
+Content-Type: application/json
+
+{
+  "exam_name": "2nd test"
+}
+
+
+###
+DELETE  http://192.168.1.7:8000/api/delete_main_exam/2
+
+
+###
+PUT  http://192.168.1.7:8000/api/status_main_exam/1
+Content-Type: application/json
+
+{"status": "Inactive"}
+
+
+
+
+//students
+###
+POST http://192.168.1.3:8000/api/add_students
+Content-Type: application/json
+
+{
+  "studentName": "Rahul Sharma",
+  "school_id": 1,
+  "session_id": 1
+}
+
+
+###
+GET http://localhost:8000/api/students/12/25
+
+
+###
+POST http://192.168.1.7:8000/api/add_students
+Content-Type: application/json
+
+{
+  "studentName": "Rahul Sharma",
+  "school_id": 1
+  
+}
+###
+POST http://192.168.1.7:8000/api/add_students
+Content-Type: application/json
+
+{
+  "studentName": "Rahul Sharma",
+  "school_id": 1
+  
+}
+
+
+###
+PUT http://192.168.1.3:8000/api/change_password_school/12
+Content-Type: application/json
+
+{
+  "password1": "87654321",
+  "password2": "87654321",
+  "password": "12345678"
+  
+}
+
+
+
+###
+PUT http://192.168.1.8:8000/api/update_employee/37
+Content-Type: application/json
+
+{
+ "employeeFullName": "Rahul Sharma Updated"
+ 
+ }
+
+
+
+###
+GET http://192.168.1.3:8000/api/employee12/43
+Content-Type: application/json
+
+
+
+###
+GET http://localhost:8000/api/class_section/1
+Content-Type: application/json
+
+
+
+
+
+
+
+
+
+
+
+//subject allots to student
+
+###
+POST http://192.168.1.2:8000/api/add_student_subject_allot
+Content-Type: application/json
+
+{
+  "student_id": 48,
+  "subjectgroup_id": 2,
+  "subject_ids": "10,11",
+  "session_id": 41,
+  "school_id": 12
+}
+
+
+###
+GET http://192.168.1.2:8000/api/student_subject_allot/12/41/48
+Content-Type: application/json
+
+
+
+###
+GET http://192.168.1.6:8000/api/list_student_subject_allot/12/41
+Content-Type: application/json
+
+
+###
+PUT http://192.168.1.2:8000/api/update_student_subject_allot/86
+Content-Type: application/json
+
+{
+
+ "subject_ids": "7,8"
+
+}
+
+
+
+
+ 
+###
+
+DELETE  http://192.168.1.7:8000/api/delete_student_subject_allot/3
+Content-Type: application/json
+
+
+
+
+
+//student fee allot
+
+###
+POST http://192.168.1.7:8000/api/add_student_fee_allot
+Content-Type: application/json
+
+{
+  "student_id": 1,
+  "school_id": 1,
+  "session_id": 1,
+  "fees": [
+    {
+      "feehead_id": 1,
+      "fee_frequency_id": 1,
+      "frequency_date": "2026-03-27",
+      "amount": 500
+    },
+    {
+      "feehead_id": 2,
+      "fee_frequency_id": 2,
+      "frequency_date": "2026-04-01",
+      "amount": 800
+    }
+  ]
+}
+
+
+###
+GET  http://192.168.1.10:8000/api/student_fee_allot/1/1/1
+Content-Type: application/json
+
+###
+PUT http://192.168.1.7:8000/api/update_student_fee_allot/1
+Content-Type: application/json
+
+{
+  "amount": 1200,
+  "display_order": 2
+}
+
+###
+DELETE http://192.168.1.7:8000/api/delete_student_fee_allot/1
+
+###
+GET http://192.168.1.7:8000/api/list_student_fee_allot/1/1
+
+
+
+
+//employee
+###
+GET http://192.168.1.7:8000/api/employee/12/1
+Content-Type: application/json
+
+
+//student
+###
+GET http://192.168.1.7:8000/api/students/12/1
+Content-Type: application/json
+
+
+//holidat master
+
+###
+POST http://192.168.1.6:8000/api/add_holiday_master
+Content-Type: application/json
+
+{
+  "session_id": 1,
+  "school_id": 12,
+  "from_date" :"2026-04-25",
+  "to_date" :"2026-04-25",
+  "holiday_name":"holisskkqj",
+  "display_order": 1,
+  "remark":"holiday off..bets",
+  "status" : "Inactive"
+}
+
+
+###
+GET  http://192.168.1.6:8000/api/holiday_master/12/1
+Content-Type: application/json
+
+
+
+
+###
+PUT http://192.168.1.6:8000/api/update_holiday_master/3
+Content-Type: application/json
+
+{
+  "display_order": 3
+}
+
+###
+DELETE http://192.168.1.6:8000/api/delete_holiday_master/3
+
+
+###
+PUT http://192.168.1.6:8000/api/status_holiday_master/4
+Content-Type: application/json
+
+{
+
+"status":"Inactive"
+
+}
+
+
+
+
+
+
+
+
+
+
+
+@baseUrl = http://192.168.1.6:8000/api
+
+
+
+### Create Gender
+POST http://192.168.1.6:8000/api/gender
+Content-Type: application/json
+
+{
+  "gender": "Male",
+  "display_order": 1,
+  "school_id": 1
+}
+
+###
+GET {{baseUrl}}/gender/1
+
+
+### 
+PUT {{baseUrl}}/gender/1
+Content-Type: application/json
+
+{
+  "gender": "Male Updated",
+  "display_order": 2
+}
+
+
+
+### 
+DELETE {{baseUrl}}/gender/1
+
+
+### 
+PUT http://192.168.1.3:8000/api/status_gender/32
+Content-Type: application/json
+
+{
+  "status": "Active"
+}
+
+
+### 
+POST http://192.168.1.6:8000/api/medium
+Content-Type: application/json
+
+{
+  "medium": "English",
+  "display_order": 1,
+  "school_id": 1
+}
+
+
+
+### 
+GET {{baseUrl}}/medium/1
+
+
+
+### 
+PUT {{baseUrl}}/medium/1
+Content-Type: application/json
+
+{
+  "medium": "Hindi",
+  "display_order": 2
+}
+
+
+
+### 
+DELETE {{baseUrl}}/medium/1
+
+
+
+###
+PATCH http://192.168.1.6:8000/api/status_medium/1
+Content-Type: application/json
+
+{
+  "status": "Active"
+}
+
+
+### Create Category
+POST {{baseUrl}}/category
+Content-Type: application/json
+
+{
+  "category": "General",
+  "display_order": 1,
+  "school_id": 1
+}
+
+###
+
+### Get Category
+GET {{baseUrl}}/category/1
+
+###
+
+### Update Category
+PUT {{baseUrl}}/category/1
+Content-Type: application/json
+
+{
+  "category": "OBC",
+  "display_order": 2
+}
+
+###
+
+### Delete Category
+DELETE {{baseUrl}}/category/1
+
+###
+
+### Update Category Status
+PATCH http://192.168.1.6:8000/api/status_category/1
+Content-Type: application/json
+
+{
+  "status": "Inactive"
+}
+
+################################################
+### 🔹 RELIGION APIs
+################################################
+
+### Create Religion
+POST {{baseUrl}}/religion
+Content-Type: application/json
+
+{
+  "religion": "Hindu",
+  "display_order": 1,
+  "school_id": 1
+}
+
+###
+
+### Get Religion
+GET {{baseUrl}}/religion/1
+
+###
+
+### Update Religion
+PUT {{baseUrl}}/religion/1
+Content-Type: application/json
+
+{
+  "religion": "Muslim",
+  "display_order": 2
+}
+
+###
+
+### Delete Religion
+DELETE {{baseUrl}}/religion/1
+
+###
+
+### Update Religion Status
+PATCH http://192.168.1.6:8000/api/status_religion/1
+Content-Type: application/json
+
+{
+  "status": "Active"
+}
+
+################################################
+### 🔹 NATIONALITY APIs
+################################################
+
+### Create Nationality
+POST {{baseUrl}}/nationality
+Content-Type: application/json
+
+{
+  "nationality": "Indian",
+  "display_order": 1,
+  "school_id": 1
+}
+
+###
+
+### Get Nationality
+GET {{baseUrl}}/nationality/1
+
+###
+
+### Update Nationality
+PUT {{baseUrl}}/nationality/1
+Content-Type: application/json
+
+{
+  "nationality": "Other",
+  "display_order": 2
+}
+
+###
+
+### Delete Nationality
+DELETE {{baseUrl}}/nationality/1
+
+###
+
+### Update Nationality Status
+PATCH http://192.168.1.6:8000/api/status_nationality/1
+Content-Type: application/json
+
+{
+  "status": "Inactive"
+}
+
+
+
+
+###
+GET http://localhost:8000/api/student_attendance/1/4/3/2026-04-20/All
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

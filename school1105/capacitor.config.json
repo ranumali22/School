@@ -1,0 +1,11 @@
+{
+  "appId": "com.egyanpath.school",
+  "appName": "School App",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}
