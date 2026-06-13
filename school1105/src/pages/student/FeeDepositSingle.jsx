@@ -80,7 +80,15 @@ const FeeDepositSingle = () => {
         );
     }
 
-    const { totalAllot, totalPaid, balance, payments, heads, allotments, breakdown, student } = feeData;
+    const
+        { totalAllot,
+            totalPaid,
+            balance,
+            payments,
+            heads, allotments,
+            breakdown,
+            student }
+            = feeData;
 
     // Map student keys for FeeReceipt compatibility
     const mappedStudent = student ? {
@@ -116,13 +124,13 @@ const FeeDepositSingle = () => {
         if (!url) return null;
         try {
             if (url.startsWith('data:')) return url;
-            
+
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2000);
 
             const res = await fetch(url, { signal: controller.signal });
             clearTimeout(timeoutId);
-            
+
             if (!res.ok) throw new Error("Fetch failed");
             const blob = await res.blob();
             return new Promise((resolve) => {
@@ -209,7 +217,7 @@ const FeeDepositSingle = () => {
                 // --- 5. Student Info Section ---
                 currentY += 12;
                 doc.setFontSize(9);
-                
+
                 // Info Row 1
                 doc.setFont("helvetica", "bold");
                 doc.text(`Student Name:`, 20, currentY);
@@ -239,7 +247,7 @@ const FeeDepositSingle = () => {
                 doc.rect(20, currentY, pageWidth - 40, 10, "F");
                 doc.setDrawColor(241, 245, 249); // slate-100
                 doc.rect(20, currentY, pageWidth - 40, 10, "S");
-                
+
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(8.5);
                 doc.setTextColor(51, 65, 85); // slate-700
@@ -301,8 +309,8 @@ const FeeDepositSingle = () => {
     };
 
     return (
-        <section className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans pb-32 md:pb-12 overflow-x-hidden">
-            <style>{`
+        <section className=" min-h-screen  overflow-x-hidden">
+            {/* <style>{`
                 @media (max-width: 768px) {
                     .main-content, .page-content {
                         overflow: visible !important;
@@ -312,20 +320,14 @@ const FeeDepositSingle = () => {
                         height: auto !important;
                     }
                 }
-            `}</style>
+            `}</style> */}
 
             {/* 🔷 MODERN APP HEADER */}
             <div className="mb-8 flex flex-col gap-6 px-1 animate-in fade-in slide-in-from-top duration-700">
                 <div className="flex justify-between items-end">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="h-2 w-8 bg-blue-600 rounded-full"></div>
-                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em]">Official Statement</span>
-                        </div>
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none">Fee Ledger</h2>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Financial Intelligence Terminal</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
+
+                    <h2 className=" text-2xl font-black text-slate-900 tracking-tighter leading-none">Fee Deposit</h2>
+                    {/* <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
                             <div className="h-7 w-7 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 border border-blue-100">
                                 <FaRupeeSign size={12} />
@@ -335,15 +337,15 @@ const FeeDepositSingle = () => {
                                 <span className="text-xs font-black text-slate-700 tracking-tight">{studentName}</span>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
-                <div className="bg-slate-900 p-5 rounded-[2rem] shadow-2xl shadow-slate-200 relative overflow-hidden group">
+                <div className="bg-slate-900 p-5 rounded-lg shadow-2xl shadow-slate-200 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
                         <FaRupeeSign size={80} className="text-white" />
                     </div>
                     <div className="relative z-10">
                         <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Active Ledger Summary</p>
-                        <h3 className="text-white text-lg font-bold leading-tight max-w-xs">
+                        <h3 className="text-white text-lg  leading-tight max-w-xs">
                             Review your complete fee history and outstanding liabilities.
                         </h3>
                     </div>
@@ -351,9 +353,9 @@ const FeeDepositSingle = () => {
             </div>
 
             {/* 📊 SUMMARY GRID (2x2 FOR MOBILE) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8 px-1">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-5 px-1">
                 {/* 📈 Fee Clearance Progress */}
-                <div className="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-3">
+                <div className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-3">
                     <div className="relative h-14 w-14 shrink-0">
                         <svg className="h-full w-full transform -rotate-90" viewBox="0 0 36 36">
                             <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-50" strokeWidth="4" />
@@ -372,7 +374,7 @@ const FeeDepositSingle = () => {
                 </div>
 
                 {/* Total Allotted */}
-                <div className="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-2">
+                <div className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-2">
                     <div className="h-10 w-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 border border-blue-100 shrink-0">
                         <FaRupeeSign size={14} />
                     </div>
@@ -383,8 +385,8 @@ const FeeDepositSingle = () => {
                 </div>
 
                 {/* Total Paid */}
-                <div className="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-2">
-                    <div className="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-100 shrink-0">
+                <div className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-2">
+                    <div className="h-10 w-10 bg-emerald-50 rounded flex items-center justify-center text-emerald-600 border border-emerald-100 shrink-0">
                         <FaRupeeSign size={14} />
                     </div>
                     <div className="flex flex-col">
@@ -394,8 +396,8 @@ const FeeDepositSingle = () => {
                 </div>
 
                 {/* Balance Due */}
-                <div className="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-2">
-                    <div className="h-10 w-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 border border-rose-100 shrink-0">
+                <div className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-2">
+                    <div className="h-10 w-10 bg-rose-50 rounded flex items-center justify-center text-rose-600 border border-rose-100 shrink-0">
                         <FaRupeeSign size={14} />
                     </div>
                     <div className="flex flex-col">
@@ -423,16 +425,16 @@ const FeeDepositSingle = () => {
                 </div>
 
                 {activeTab === 'history' ? (
-                    <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="bg-white rounded-lg shadow-sm border border-slate-100 overflow-hidden">
                         <div className="p-6 border-b border-slate-50 flex justify-between items-center">
                             <h3 className="text-lg font-black text-slate-900 tracking-tight">Recent Transactions</h3>
-                            <button
+                            {/* <button
                                 onClick={() => setShowExport(!showExport)}
                                 className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all"
                             >
                                 <FaFilePdf size={16} />
-                            </button>
-                            {showExport && (
+                            </button> */}
+                            {/* {showExport && (
                                 <div className="absolute right-6 mt-12 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden">
                                     <button onClick={() => { exportPDF(); setShowExport(false); }} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 w-full text-left text-[10px] font-black text-slate-600 uppercase tracking-widest">
                                         <FaFilePdf className="text-rose-500" /> PDF Report
@@ -441,7 +443,7 @@ const FeeDepositSingle = () => {
                                         <FaFileExcel className="text-emerald-500" /> Excel Sheet
                                     </button>
                                 </div>
-                            )}
+                            )} */}
                         </div>
 
                         {/* Desktop View Table */}
@@ -453,7 +455,7 @@ const FeeDepositSingle = () => {
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Date</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Fee Head</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Amount</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Action</th>
+                                        {/* <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Action</th> */}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
@@ -462,14 +464,14 @@ const FeeDepositSingle = () => {
                                             <td className="px-6 py-4 text-slate-900 text-sm font-bold">{p.receiptNo || "N/A"}</td>
                                             <td className="px-6 py-4 text-center text-slate-600 text-sm">{formatDateDisplay(p.pay_date || p.payment_date)}</td>
                                             <td className="px-6 py-4">
-                                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black bg-blue-50 text-blue-600 uppercase tracking-widest">
+                                                <span className="inline-flex items-center px-2.5 py-1 capitalize rounded-lg text-[10px] font-black bg-blue-50 text-blue-600 uppercase tracking-widest">
                                                     {getHeadName(p.feehead_id || p.fee_head_id)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right text-slate-900 font-black">₹{p.fee_pay}</td>
-                                            <td className="px-6 py-4 text-center">
+                                            {/* <td className="px-6 py-4 text-center">
                                                 <button onClick={() => setSelectedReceipt(p)} className="text-blue-600 text-xs font-black uppercase tracking-widest hover:underline">View</button>
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -480,21 +482,21 @@ const FeeDepositSingle = () => {
                         <div className="md:hidden divide-y divide-slate-50">
                             {currentPayments.length > 0 ? (
                                 currentPayments.map((p, i) => (
-                                    <div key={p.id || i} className="p-6 flex flex-col gap-4 active:bg-slate-50 transition-colors">
+                                    <div key={p.id || i} className="px-6 py-2 flex flex-col gap-4 active:bg-slate-50 transition-colors">
                                         <div className="flex justify-between items-start">
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">#{p.receiptNo || "N/A"}</span>
-                                                <h4 className="font-black text-slate-900 text-sm">{getHeadName(p.feehead_id || p.fee_head_id)}</h4>
+                                                <h4 className="font-black text-slate-900 text-sm  capitalize">{getHeadName(p.feehead_id || p.fee_head_id)}</h4>
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-base font-black text-emerald-600 leading-none">₹{p.fee_pay}</p>
                                                 <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">{formatDateDisplay(p.pay_date || p.payment_date)}</p>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between items-center">
+                                        {/* <div className="flex justify-between items-center">
                                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2 py-0.5 bg-slate-50 rounded-md">Paid Online</span>
                                             <button onClick={() => setSelectedReceipt(p)} className="text-blue-600 text-[10px] font-black uppercase tracking-widest underline decoration-blue-200 decoration-2 underline-offset-4">Get Receipt</button>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 ))
                             ) : (
@@ -546,7 +548,7 @@ const FeeDepositSingle = () => {
                     </div>
                 )}
 
-                {activeTab === 'history' && (payments || []).length > 0 && (
+                {/* {activeTab === 'history' && (payments || []).length > 0 && (
                     <div className="mt-8">
                         <CommonPagination
                             currentPage={currentPage}
@@ -557,7 +559,10 @@ const FeeDepositSingle = () => {
                             onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
                         />
                     </div>
-                )}
+                )} */}
+
+
+
             </div>
 
             {selectedReceipt && (

@@ -8,6 +8,7 @@ const ExamTimeTable = () => {
     const [sectionList, setSectionList] = useState([]);
     const [examList, setExamList] = useState([]);
     const [subjectsList, setSubjectsList] = useState([]);
+    const [subjectGroupList, setSubjectGroupList] = useState([]);
     const [classSubjects, setClassSubjects] = useState([]);
     const [timetable, setTimetable] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -15,6 +16,7 @@ const ExamTimeTable = () => {
     const [form, setForm] = useState({
         class_id: "",
         exam_id: "",
+        group_id: "",
     });
 
     const school_id = localStorage.getItem("school_id");
@@ -47,6 +49,12 @@ const ExamTimeTable = () => {
             const subData = await subRes.json();
             if (subData.success) {
                 setSubjectsList(subData.row || subData.rows || []);
+            }
+
+            const groupRes = await fetch(localurl + "subject_group/" + school_id);
+            const groupData = await groupRes.json();
+            if (groupData.success) {
+                setSubjectGroupList((groupData.subject_name || []).filter(g => g.status === "Active").sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
             }
         } catch (error) {
             console.error("Error fetching masters:", error);
@@ -191,7 +199,7 @@ const ExamTimeTable = () => {
 
             {/* Filters */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8 items-end">
-                <div className="md:col-span-4">
+                <div className="md:col-span-3">
                     <ClassSelect
                         label="Class Section"
                         value={form.class_id}
@@ -205,7 +213,21 @@ const ExamTimeTable = () => {
                         ]}
                     />
                 </div>
-                <div className="md:col-span-4">
+                <div className="md:col-span-3">
+                    <ClassSelect
+                        label="Subject Group"
+                        value={form.group_id}
+                        onChange={(e) => setForm({ ...form, group_id: e.target.value })}
+                        options={[
+                            { label: "All Groups", value: "" },
+                            ...subjectGroupList.map((g) => ({
+                                label: g.group_name,
+                                value: g.id,
+                            })),
+                        ]}
+                    />
+                </div>
+                <div className="md:col-span-3">
                     <ClassSelect
                         label="Exam"
                         value={form.exam_id}
@@ -219,7 +241,7 @@ const ExamTimeTable = () => {
                         ]}
                     />
                 </div>
-                <div className="md:col-span-2">
+                <div className="md:col-span-3">
                     <button
                         onClick={handleFind}
                         className="w-full bg-[#0860C4] hover:bg-blue-700 text-white py-2.5 px-6 rounded-xl shadow-md active:scale-95 flex items-center justify-center gap-2"
@@ -252,10 +274,18 @@ const ExamTimeTable = () => {
                                             <select
                                                 value={row.subject_id}
                                                 onChange={(e) => handleDataChange(index, "subject_id", e.target.value)}
-                                                className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                className="w-full border border-gray-300 rounded-md px-3 capitalize py-1.5 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                                             >
                                                 <option value="">Select Subject</option>
-                                                {classSubjects.map((sub) => (
+                                                {classSubjects.filter((sub) => {
+                                                    if (!form.group_id) return true;
+                                                    const group = subjectGroupList.find(g => String(g.id) === String(form.group_id));
+                                                    if (group && group.subject_ids) {
+                                                        const groupSubjectIds = String(group.subject_ids).split(",").map(Number);
+                                                        return groupSubjectIds.includes(Number(sub.id));
+                                                    }
+                                                    return false;
+                                                }).map((sub) => (
                                                     <option key={sub.id} value={sub.id}>
                                                         {sub.subject_name}
                                                     </option>

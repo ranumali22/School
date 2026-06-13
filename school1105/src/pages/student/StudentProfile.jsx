@@ -81,7 +81,7 @@ const StudentProfile = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] md:bg-[#f3f4f6] pb-12 pt-0 md:pt-6">
+    <div className="min-h-screen  ">
       <div className="max-w-6xl mx-auto px-0 md:px-4">
         
         {/* 🔷 HEADER SECTION (Clean for Mobile, Card for Desktop) */}

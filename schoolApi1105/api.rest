@@ -18,6 +18,16 @@ Content-Type: application/json
 GET http://192.168.1.6:8000/api/session/12
 Content-Type: application/json
 
+### 1. GET SESSION BY SCHOOL ID
+GET http://192.168.1.8:8001/api/super_admin_login
+Content-Type: application/json
+
+{
+  "login_id": "kingfish_super",
+  "password": "kingfish_super"
+}
+
+
 
 ### 2. UPDATE SESSION
 PUT http://192.168.1.6:8000/api/update_session/1

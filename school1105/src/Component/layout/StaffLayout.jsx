@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import StaffSidebar from "./StaffSidebar";
 import StaffTopbar from "./StaffTopbar";
+import StaffBottomBar from "./StaffBottomBar";
 import { registerPushNotifications } from "../../utils/pushNotifications";
 
 const StaffLayout = ({ children }) => {
@@ -30,6 +31,8 @@ const StaffLayout = ({ children }) => {
           {children}
         </div>
       </div>
+
+      <StaffBottomBar />
     </div>
   );
 };

@@ -112,42 +112,84 @@ const StaffTimetable = () => {
   const myTimetable = timetable.filter(t => (t.staff_id == staff_id || t.teacher_id == staff_id));
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          body { background: white !important; padding: 0 !important; }
-          .print-area { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; }
-          @page { size: landscape; margin: 10mm; }
-        }
-      `}</style>
-
-      <div className="mb-8 flex justify-between items-end">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Clock className="text-[#0860C4]" />
-            My Teaching Schedule
-          </h2>
-          <p className="text-gray-500 font-medium mt-1">Overview of your assigned periods and classes across the school.</p>
-        </div>
-        <button
-          onClick={handlePrint}
-          className="bg-[#0860C4] text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-800 transition-all shadow-lg active:scale-95 no-print"
-        >
-          <Printer size={18} />
-          Print Timetable
-        </button>
+    <div className="min-h-screen  md:px-6  md:py-8 md:bg-gray-50">
+      <div className="mb-4 md:mb-6">
+        <h4 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 flex items-center gap-2">
+          My Teaching Schedule
+        </h4>
       </div>
 
       <div className="max-w-[1400px] mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden print-area">
 
+        {/* MOBILE VIEW - Card Layout */}
+        <div className="md:hidden ">
+          {myClasses.length > 0 ? (
+            myClasses.map(cls => (
+              <div key={cls.id} className="bg-gradient-to-br from-blue-50 to-slate-50 rounded-xl border border-blue-100 overflow-hidden shadow-sm">
+                {/* Class Header */}
+                <div className="flex items-center gap-3 bg-[#0860C4] text-white px-4 py-3">
+                  <div className="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <BookOpen size={16} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">{cls.class_name}</p>
+                    <p className="text-[11px] opacity-90">{cls.section || "Section A"}</p>
+                  </div>
+                </div>
 
-        {/* Timetable Grid */}
-        <div className="overflow-x-auto w-full">
+                {/* Schedule Grid */}
+                <div className="p-4 space-y-3">
+                  {periods.map(p => {
+                    const allot = myTimetable.find(t => t.period_id == p.id && t.class_id == cls.id);
+                    return (
+                      <div key={p.id} className="flex items-start gap-3 pb-3 border-b border-blue-100 last:border-b-0">
+                        {/* Period Time */}
+                        <div className="flex-shrink-0 min-w-[70px]">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Period</p>
+                          <p className="font-bold text-[13px] text-[#0860C4] mt-1">{p.period}</p>
+                          <p className="text-[10px] text-gray-600 mt-0.5">{p.start_time} - {p.end_time}</p>
+                        </div>
+
+                        {/* Subject Info */}
+                        <div className="flex-1">
+                          {allot ? (
+                            <div className={`${getSubjectColor(allot.subject_id)} p-3 rounded-lg border-2`}>
+                              <p className="text-[12px] font-bold uppercase leading-tight mb-2">
+                                {getSubjectName(allot.subject_id)}
+                              </p>
+                              <div className="bg-white/50 rounded px-2 py-1">
+                                <p className="text-[10px] font-bold text-gray-700">
+                                  Room: {allot.room_no || "N/A"}
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center">
+                              <p className="text-[11px] text-gray-400 font-medium">No class scheduled</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-12 text-center">
+              <BookOpen size={48} className="mx-auto mb-3 opacity-30" />
+              <p className="font-bold text-lg text-gray-700">No periods allotted to you yet.</p>
+              <p className="text-sm text-gray-500 mt-1">Please contact the administrator for your schedule.</p>
+            </div>
+          )}
+        </div>
+
+        {/* DESKTOP VIEW - Table Layout */}
+        <div className="hidden md:block overflow-x-auto w-full">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-white border-b border-gray-200">
-                <th className="p-0 border-r border-gray-200 bg-white sticky left-0 z-20 w-[150px] overflow-hidden">
+                <th className="p-0 border-r border-gray-200 bg-white sticky left-0 z-20 lg:w-[150px] md:w-[120px] overflow-hidden">
                   <div className="relative h-[72px] w-full bg-white">
                     {/* Diagonal Line using SVG for precision */}
                     <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
@@ -163,14 +205,14 @@ const StaffTimetable = () => {
                   </div>
                 </th>
                 {periods.map((p) => (
-                  <th key={p.id} className="p-4 text-center border-r border-gray-200 bg-slate-50/30 min-w-[180px]">
+                  <th key={p.id} className="p-3 lg:p-4 text-center border-r border-gray-200 bg-slate-50/30 lg:min-w-[180px] md:min-w-[140px]">
                     <div className="flex flex-col items-center gap-1">
-                      <span className="text-[#0860C4] font-bold text-sm ">
+                      <span className="text-[#0860C4] font-bold lg:text-sm md:text-xs">
                         {p.period}
                       </span>
                       <div className="flex items-center gap-1 px-2 py-0.5 bg-white rounded-md border border-gray-100 shadow-sm">
                         <Clock size={10} className="text-gray-400" />
-                        <span className="text-[11px] font-bold text-gray-600">
+                        <span className="lg:text-[11px] md:text-[9px] font-bold text-gray-600">
                           {p.start_time} - {p.end_time}
                         </span>
                       </div>
@@ -183,14 +225,14 @@ const StaffTimetable = () => {
               {myClasses.length > 0 ? (
                 myClasses.map(cls => (
                   <tr key={cls.id} className="hover:bg-blue-50/20 transition-colors group">
-                    <td className="p-3 border-r border-gray-200 sticky left-0 bg-white group-hover:bg-blue-50/20 z-10 transition-colors">
+                    <td className="p-3 border-r border-gray-200 sticky left-0 bg-white group-hover:bg-blue-50/20 z-10 transition-colors lg:p-4">
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center text-[#0860C4]">
+                        <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center text-[#0860C4] flex-shrink-0">
                           <BookOpen size={16} />
                         </div>
-                        <div className="flex items-center gap-1">
-                          <div className="font-bold text-gray-900 text-[14px] whitespace-nowrap">{cls.class_name}</div>
-                          <div className="font-bold text-gray-900 text-[14px] whitespace-nowrap">{cls.section || "Section A"}</div>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <div className="font-bold text-gray-900 lg:text-[14px] md:text-[12px] whitespace-nowrap truncate">{cls.class_name}</div>
+                          <div className="font-bold text-gray-900 lg:text-[14px] md:text-[12px] whitespace-nowrap flex-shrink-0">{cls.section || "A"}</div>
                         </div>
                       </div>
                     </td>
@@ -199,14 +241,14 @@ const StaffTimetable = () => {
                       const cellStyles = allot ? getSubjectColor(allot.subject_id) : "";
 
                       return (
-                        <td key={p.id} className="p-1.5 border-r border-gray-100 last:border-r-0 h-24 min-w-[140px]">
+                        <td key={p.id} className="p-1 border-r border-gray-100 last:border-r-0 lg:h-24 md:h-20 lg:min-w-[180px] md:min-w-[140px] lg:p-1.5">
                           {allot ? (
                             <div className={`h-full flex flex-col items-center justify-center p-1 rounded-lg border-2 shadow-sm transition-all hover:scale-[1.02] ${cellStyles}`}>
-                              <span className="text-[11px] font-bold uppercase leading-tight mb-0.5 text-center line-clamp-2">
+                              <span className="lg:text-[11px] md:text-[9px] font-bold uppercase leading-tight mb-0.5 text-center line-clamp-2">
                                 {getSubjectName(allot.subject_id)}
                               </span>
                               <div className="flex items-center gap-1.5 py-0.5 px-1.5 bg-white/40 rounded-md backdrop-blur-sm border border-white/50 shadow-inner">
-                                <div className="text-[9px] font-bold uppercase tracking-tight">
+                                <div className="lg:text-[9px] md:text-[8px] font-bold uppercase tracking-tight">
                                   Room: {allot.room_no || "N/A"}
                                 </div>
                               </div>
@@ -237,16 +279,7 @@ const StaffTimetable = () => {
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 p-6 flex justify-between items-center border-t border-gray-100">
-          <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-            <span>Verified Academic Document</span>
-            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-            <span>Staff Portal v2.1</span>
-          </div>
-          <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-            Generated on {new Date().toLocaleDateString()}
-          </div>
-        </div>
+        
       </div>
     </div>
   );

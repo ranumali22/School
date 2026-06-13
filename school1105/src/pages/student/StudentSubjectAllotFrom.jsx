@@ -60,6 +60,13 @@ const StudentSubjectForm = ({ studentData, setShowForm, getStudentAllot }) => {
 
   const handleChange = (value) => {
     setGroupId(value);
+    const group = groups.find((g) => g.id == value);
+    if (group && group.subject_ids) {
+      const ids = group.subject_ids.split(",").map(Number);
+      setSelectedSubjects(ids);
+    } else {
+      setSelectedSubjects([]);
+    }
   };
 
   useEffect(() => {

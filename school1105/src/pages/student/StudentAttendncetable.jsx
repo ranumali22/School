@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
     ClassSelect,
     FloatingInputs,
@@ -11,6 +11,8 @@ import { localurl } from "../../api/api";
 import { showError } from "../../Component/common/alert";
 import StudentAttendance from "./StudentAttendance";
 import useSessionEffect from "../../hooks/useSessionEffect";
+import usePagination from "../../hooks/usePagination";
+import CommonPagination from "../../Component/common/Pagination";
 
 const StudentAttendancetable = () => {
 
@@ -65,6 +67,41 @@ const StudentAttendancetable = () => {
     const [editData, setEditData] = useState(null);
     const [selectedClassId, setSelectedClassId] = useState("");
     const [search, setSearch] = useState("");
+    const [modalSearch, setModalSearch] = useState("");
+
+    const filteredClasses = useMemo(() => {
+        return sectionList.filter(c =>
+            `${c.section}`
+                .toLowerCase()
+                .includes(search.toLowerCase())
+        );
+    }, [sectionList, search]);
+
+    // Pagination for main table
+    const {
+        currentPage: mainPage,
+        totalPages: mainTotalPages,
+        currentData: paginatedClasses,
+        setCurrentPage: setMainPage,
+        itemsPerPage: mainItemsPerPage,
+        changeItemsPerPage: changeMainItemsPerPage,
+    } = usePagination(filteredClasses, 10);
+
+    const filteredStudents = useMemo(() => {
+        return selectedStudents.filter(s =>
+            s.student_name.toLowerCase().includes(modalSearch.toLowerCase())
+        );
+    }, [selectedStudents, modalSearch]);
+
+    // Pagination for modal
+    const {
+        currentPage: modalPage,
+        totalPages: modalTotalPages,
+        currentData: paginatedStudentsList,
+        setCurrentPage: setModalPage,
+        itemsPerPage: modalItemsPerPage,
+        changeItemsPerPage: changeModalItemsPerPage,
+    } = usePagination(filteredStudents, 10);
 
     useSessionEffect(() => {
         handleAttendance(form.date);
@@ -235,66 +272,74 @@ const StudentAttendancetable = () => {
                     </thead>
 
                     <tbody>
-                        {sectionList
-                            .filter(c =>
-                                `${c.section}`
-                                    .toLowerCase()
-                                    .includes(search.toLowerCase())
-                            )
-                            .map((c, i) => (
-                                <tr key={c.class_id} className="border-t text-center">
+                        {paginatedClasses.map((c, i) => (
+                            <tr key={c.class_id} className="border-t text-center">
 
-                                    <td className="px-2 md:px-4 py-2">
-                                        {i + 1}
-                                    </td>
+                                <td className="px-2 md:px-4 py-2">
+                                    {(mainPage - 1) * mainItemsPerPage + i + 1}
+                                </td>
 
-                                    <td className="px-2 md:px-4 py-2">
-                                        {c.section}
-                                    </td>
+                                <td className="px-2 md:px-4 py-2">
+                                    {c.section}
+                                </td>
 
-                                    <td className="px-2 md:px-4 py-2">
-                                        {form.date?.split("-").reverse().join("-")}
-                                    </td>
+                                <td className="px-2 md:px-4 py-2">
+                                    {form.date?.split("-").reverse().join("-")}
+                                </td>
 
-                                    <td className="px-2 md:px-4 py-2">
-                                        <button
-                                            onClick={() => handleView(c.class_id)}
-                                            className="bg-blue-600 text-white px-3 py-1 rounded"
-                                        >
-                                            View
-                                        </button>
-                                    </td>
+                                <td className="px-2 md:px-4 py-2">
+                                    <button
+                                        onClick={() => handleView(c.class_id)}
+                                        className="bg-blue-600 text-white px-3 py-1 rounded"
+                                    >
+                                        View
+                                    </button>
+                                </td>
 
-                                    <td className="px-2 md:px-4 py-2 text-center">
-                                        <RiEdit2Fill size={20}
-                                            className="cursor-pointer text-blue-600 mx-auto"
-                                            onClick={() => {
-                                                setEditData(c);
-                                                setShowForm(true);
-                                            }}
-                                        />
-                                    </td>
+                                <td className="px-2 md:px-4 py-2 text-center">
+                                    <RiEdit2Fill size={20}
+                                        className="cursor-pointer text-blue-600 mx-auto"
+                                        onClick={() => {
+                                            setEditData(c);
+                                            setShowForm(true);
+                                        }}
+                                    />
+                                </td>
 
-                                </tr>
-                            ))}
+                            </tr>
+                        ))}
                     </tbody>
 
                 </table>
             </div>
 
+            <div className="mt-4">
+                <CommonPagination
+                    currentPage={mainPage}
+                    totalPages={mainTotalPages}
+                    onPageChange={setMainPage}
+                    totalItems={filteredClasses.length}
+                    itemsPerPage={mainItemsPerPage}
+                    onItemsPerPageChange={changeMainItemsPerPage}
+                />
+            </div>
+
 
 
             {isStudentModalOpen && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-999">
 
-                    <div className="bg-white w-[75%] md:w-[60%] max-h-[90vh] overflow-y-auto rounded-xl p-4">
+                    <div className="bg-white w-[75%] md:w-[60%] max-h-[80vh] overflow-y-auto rounded-xl p-4">
 
                         {/* CLOSE BUTTON */}
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-lg font-bold"></h2>
 
                             <button
-                                onClick={() => setIsStudentModalOpen(false)}
+                                onClick={() => {
+                                    setIsStudentModalOpen(false);
+                                    setModalSearch("");
+                                }}
                                 className="text-red-500 font-bold"
                             >
                                 ✕
@@ -325,8 +370,8 @@ const StudentAttendancetable = () => {
                                 <input
                                     type="text"
                                     placeholder="Search Student..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
+                                    value={modalSearch}
+                                    onChange={(e) => setModalSearch(e.target.value)}
                                     className="outline-none w-full"
                                 />
                             </div>
@@ -351,29 +396,36 @@ const StudentAttendancetable = () => {
                             </thead>
 
                             <tbody>
-                                {selectedStudents
-                                    .filter(s =>
-                                        s.student_name.toLowerCase().includes(search.toLowerCase())
-                                    )
-                                    .map((s, i) => (
-                                        <tr key={s.id} className="border-t text-center">
-                                            <td className="px-2 md:px-4 py-2 whitespace-nowrap">{i + 1}</td>
-                                            <td className="px-2 md:px-4 py-2 whitespace-nowrap">{s.student_name}</td>
+                                {paginatedStudentsList.map((s, i) => (
+                                    <tr key={s.id} className="border-t text-center">
+                                        <td className="px-2 md:px-4 py-2 whitespace-nowrap">{(modalPage - 1) * modalItemsPerPage + i + 1}</td>
+                                        <td className="px-2 md:px-4 py-2 whitespace-nowrap">{s.student_name}</td>
 
-                                            <td className={
-                                                getStatus(s) === "Present"
-                                                    ? "text-green-600"
-                                                    : "text-red-600"
-                                            }>
-                                                {getStatus(s)}
-                                            </td>
+                                        <td className={
+                                            getStatus(s) === "Present"
+                                                ? "text-green-600"
+                                                : "text-red-600"
+                                        }>
+                                            {getStatus(s)}
+                                        </td>
 
-                                            <td className="px-2 md:px-4 py-2 whitespace-nowrap">{s.in_time || "--"}</td>
-                                            <td className="px-2 md:px-4 py-2 whitespace-nowrap">{s.out_time || "--"}</td>
-                                        </tr>
-                                    ))}
+                                        <td className="px-2 md:px-4 py-2 whitespace-nowrap">{s.in_time || "--"}</td>
+                                        <td className="px-2 md:px-4 py-2 whitespace-nowrap">{s.out_time || "--"}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
+
+                        <div className="mt-4">
+                            <CommonPagination
+                                currentPage={modalPage}
+                                totalPages={modalTotalPages}
+                                onPageChange={setModalPage}
+                                totalItems={filteredStudents.length}
+                                itemsPerPage={modalItemsPerPage}
+                                onItemsPerPageChange={changeModalItemsPerPage}
+                            />
+                        </div>
 
                     </div>
                 </div>

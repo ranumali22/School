@@ -91,7 +91,6 @@ const StudentSubjectAllot = () => {
       );
     });
 
-    // ✅ SORTING (your logic)
     if (sortConfig.key) {
       data.sort((a, b) => {
         const aVal = a[sortConfig.key] ?? "";
@@ -263,7 +262,7 @@ const StudentSubjectAllot = () => {
             {
               currentData.length === 0 ? (
                 <tr>
-                  <td colSpan="13" className="text-center py-4">
+                  <td colSpan="7" className="text-center py-4">
                     No Data Found
                   </td>
                 </tr>
@@ -273,8 +272,8 @@ const StudentSubjectAllot = () => {
 
                   return (
                     <tr key={i} className="text-center border-t">
-                      <td className="p-2">{i + 1}</td>
-                      <td className="p-2 whitespace-nowrap">{row.student_ids}</td>
+                      <td className="p-2">{(currentPage - 1) * itemsPerPage + i + 1}</td>
+                      <td className="p-2 whitespace-nowrap">{row.stu_prefix}{row.student_ids}</td>
                       <td className="p-2 whitespace-nowrap">
                         {" "}
                         {row.students_name}

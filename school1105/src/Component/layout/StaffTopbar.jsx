@@ -80,45 +80,44 @@ const StaffTopbar = ({ setMobileOpen }) => {
   };
 
   return (
-    <div className="h-[74px] md:h-16 bg-[#0860C4] shadow-md flex items-center justify-between px-4 md:px-6 relative z-[100] pt-2 md:pt-0 w-full">
-      <div className="flex items-center gap-4">
+    <div className="h-16 bg-[#0860C4] shadow-md flex items-center justify-between px-6 sticky top-0 z-[100]">
+      <div className="flex items-center ">
         <Menu
-          className="mobile-menu-btn text-white cursor-pointer active:scale-95 transition-transform"
-          onClick={() => setMobileOpen((prev) => !prev)}
-          size={24}
+          className="mobile-menu-btn text-white cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => setMobileOpen(true)}
+          size={20}
         />
 
         <h1
-          className="!text-white !text-[15px] md:!text-[18px] !font-black !tracking-tight !uppercase hidden md:block"
-          style={{ fontFamily: "'Inter', sans-serif" }}
+          className="topbar-school-name !text-white uppercase"
+          className="!text-white !text-[20px]  !uppercase "
+
         >
           {school?.school_name || "School Dashboard"}
         </h1>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* NOTIFICATION */}
-        <div className="relative">
-          {/* 🔔 BELL */}
+      {/* Right Section */}
+      <div className="flex items-center gap-6">
+        {/* Notification */}
+        <div className="relative cursor-pointer group flex items-center justify-center w-9 h-9 rounded-full hover:bg-white/10 transition-colors">
           <div
-            className="relative cursor-pointer p-2 rounded-full hover:bg-white/20 transition"
+            className="cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               setNotifOpen(!notifOpen);
             }}
           >
             <Bell className="text-white" size={20} />
-
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full shadow">
-                {unreadCount}
-              </span>
-            )}
           </div>
 
-          {/* 🔽 DROPDOWN */}
+          {unreadCount > 0 && (
+            <span className="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-bold min-w-[16px] h-[16px] flex items-center justify-center rounded-full border-2 border-[#0860C4] px-1">
+              {unreadCount}
+            </span>
+          )}
           {notifOpen && (
-            <div className="absolute right-0 mt-3 w-[calc(100vw-32px)] md:w-96 bg-white shadow-2xl rounded-2xl overflow-hidden z-50 border">
+            <div className="absolute  -right-10 top-full mt-2 w-[320px] max-w-[95vw] md:w-[380px] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-2xl overflow-hidden z-[9999] border border-gray-100 animate-in fade-in zoom-in duration-200">
               {/* HEADER */}
               <div className="flex justify-between items-center px-4 py-3 border-b bg-gray-50">
                 <h3 className="font-semibold text-gray-800">Notifications</h3>
@@ -257,70 +256,75 @@ const StaffTopbar = ({ setMobileOpen }) => {
           )}
         </div>
 
+        {/* Profile */}
         <div className="relative" ref={dropdownRef}>
           <div
             onClick={(e) => {
               e.stopPropagation();
               setOpen(!open);
             }}
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-2.5 cursor-pointer"
           >
-            <span className="text-white font-medium capitalize hidden sm:block">
-              {user?.name?.toLowerCase() || "Staff"}
-            </span>
-
             <img
               src={
                 rawUser?.employeePhoto
                   ? `${imageBase}uploads/employee/${rawUser.employeePhoto}`
                   : "/default-user.png"
               }
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-white/20 shadow-sm"
+              className="w-8 h-8 rounded-full object-cover border border-white/20 shadow-sm"
             />
+
+            <span className="text-white font-bold text-[13px] hidden lg:block">
+              {user?.name || "Staff"}
+            </span>
           </div>
 
           {open && (
-            <div className="absolute right-0 mt-3 w-[calc(100vw-32px)] sm:w-64 bg-white shadow-xl rounded-xl p-4 border z-50">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 bg-blue-500 text-white flex items-center justify-center rounded-full font-bold">
-                  {(user?.name || "S")[0]}
+            <div className="absolute right-0 mt-3 w-64 bg-white shadow-2xl rounded-2xl p-4 border border-slate-100 z-50 animate-in fade-in zoom-in duration-200">
+              {/* USER INFO */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 bg-[#0860C4] text-white flex items-center justify-center rounded-full font-black text-sm">
+                  {user?.name?.[0] || "S"}
                 </div>
 
-                <div>
-                  <p className="font-semibold text-gray-800 capitalize">
-                    {user?.name?.toLowerCase()}
+                <div className="overflow-hidden">
+                  <p className="font-bold text-slate-900 text-[13px] leading-tight truncate">
+                    {user?.name || "Staff"}
                   </p>
 
-                  <p className="text-xs text-gray-500">ID: {user?.loginid}</p>
-
-                  <p className="text-xs text-gray-500">
-                    Session : {session_name || "N/A"}
-                  </p>
-
-                  <p className="text-xs text-gray-500">
-                    School Code : {school_id || "N/A"}
+                  <p className="text-[10px] font-medium text-slate-500 mt-0.5 truncate">
+                    {user?.role || "Staff Member"}
                   </p>
                 </div>
               </div>
 
-              <hr className="mb-3" />
+              <div className="h-px bg-slate-100 mb-3" />
 
-              <button
-                onClick={() => {
-                  navigate("/staff-profile"); // 🔥 IMPORTANT CHANGE
-                  setOpen(false);
-                }}
-                className="block w-full text-left px-3 py-2 rounded hover:bg-gray-100"
-              >
-                👤 My Profile
-              </button>
+              {/* MENU */}
+              <div className="space-y-0.5">
+                <button
+                  onClick={() => {
+                    navigate("/staff-profile");
+                    setOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-xl text-slate-700 font-semibold text-[13px] hover:bg-slate-50 hover:text-[#0860C4] transition-all group"
+                >
+                  <UserCircle className="text-slate-400 group-hover:text-[#0860C4]" size={16} />
+                  <span>Staff Profile</span>
+                </button>
 
-              <button
-                onClick={logout}
-                className="block w-full text-left px-3 py-2 text-red-500 hover:bg-red-50 rounded"
-              >
-                🚪 Logout
-              </button>
+                <div className="h-px bg-slate-50 my-1.5" />
+
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-2.5 w-full text-left px-3 py-2 rounded-xl text-red-500 font-bold text-[13px] hover:bg-red-50 transition-all group"
+                >
+                  <div className="text-red-400 group-hover:text-red-500">
+                    <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" height="16" width="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                  </div>
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

@@ -7,6 +7,8 @@ import {
 } from "../../Component/common/FloatingInput";
 import Swal from "sweetalert2";
 import { showSuccess, showError } from "../../Component/common/alert";
+import usePagination from "../../hooks/usePagination";
+import CommonPagination from "../../Component/common/Pagination";
 
 const StudentPromote = () => {
   // State variables
@@ -17,7 +19,7 @@ const StudentPromote = () => {
   const [promoting, setPromoting] = useState(false);
 
   // Filters state
-  const [filterClass, setFilterClass] = useState("All");
+const [filterClass, setFilterClass] = useState("");
   const [filterName, setFilterName] = useState("");
   const [filterFatherName, setFilterFatherName] = useState("");
   const [filterSrNo, setFilterSrNo] = useState("");
@@ -26,10 +28,8 @@ const StudentPromote = () => {
   const [targetSession, setTargetSession] = useState("");
   const [targetClass, setTargetClass] = useState("");
 
-  // Table search, pagination & sorting state
+  // Table search & sorting state
   const [tableSearch, setTableSearch] = useState("");
-  const [itemsPerPage, setItemsPerPage] = useState(50);
-  const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
 
   // Checked students tracking
@@ -39,81 +39,7 @@ const StudentPromote = () => {
   const school_id = localStorage.getItem("school_id") || "";
   const current_session_id = localStorage.getItem("session_id") || "";
 
-  // Mock students fallback to ensure visual completion in empty database env
-  const mockStudents = [
-    {
-      id: 1,
-      registerNo: "0",
-      class_name: "XI Arts",
-      section: "A",
-      studentName: "Aditya Yadav",
-      fatherName: "NARENDRA Ku.Yadav",
-      motherName: "Sharvani devi",
-      primaryNo: "9024714949",
-      rte: "No",
-      registerClass: "XI Arts - A",
-    },
-    {
-      id: 2,
-      registerNo: "41",
-      class_name: "XI Arts",
-      section: "A",
-      studentName: "ANITA SERAWAT",
-      fatherName: "SHRAWAN LAL SERAWAT",
-      motherName: "SUMITRA DEVI",
-      primaryNo: "9950350705",
-      rte: "No",
-      registerClass: "XI Arts - A",
-    },
-    {
-      id: 3,
-      registerNo: "16",
-      class_name: "XI Arts",
-      section: "A",
-      studentName: "ANJALI YADAV",
-      fatherName: "SHRAWAN KUMAR YADAV",
-      motherName: "GUDDI YADAV",
-      primaryNo: "9929279276",
-      rte: "No",
-      registerClass: "XI Arts - A",
-    },
-    {
-      id: 4,
-      registerNo: "7",
-      class_name: "XI Arts",
-      section: "A",
-      studentName: "ANKIT PRAJAPAT",
-      fatherName: "MAHESH CHAND KUMAWAT",
-      motherName: "SULOCHANA DEVI",
-      primaryNo: "9284457918",
-      rte: "No",
-      registerClass: "XI Arts - A",
-    },
-    {
-      id: 5,
-      registerNo: "0",
-      class_name: "XI Arts",
-      section: "A",
-      studentName: "ANKIT SONKARIYA",
-      fatherName: "MUKESH KUMAR SONKARIYA",
-      motherName: "SANTOSH DEVI",
-      primaryNo: "8890336102",
-      rte: "No",
-      registerClass: "XI Arts - A",
-    },
-    {
-      id: 6,
-      registerNo: "4175",
-      class_name: "XI Arts",
-      section: "A",
-      studentName: "Bharat Singh",
-      fatherName: "Madhu Singh",
-      motherName: "Sushila Devi",
-      primaryNo: "7073224650",
-      rte: "No",
-      registerClass: "XI Arts - A",
-    },
-  ];
+
 
   // Fetch initial data
   useEffect(() => {
@@ -165,32 +91,40 @@ const StudentPromote = () => {
   const fetchStudents = async () => {
     if (!school_id || !current_session_id) return;
     setLoading(true);
-    setSelectedStudentIds(new Set()); // Reset selections
+    setSelectedStudentIds(new Set()); 
     try {
       const res = await fetch(
         `${localurl}students/${school_id}/${current_session_id}`,
       );
       const data = await res.json();
       if (data.success && data.row && data.row.length > 0) {
-        setStudents(data.row);
+        const activeStudents = data.row.filter(
+          (student) => String(student.status || "").toLowerCase() === "active"
+        );
+        setStudents(activeStudents);
       } else {
-        setStudents(mockStudents);
+        setStudents([]);
       }
     } catch (error) {
       console.error("Error fetching students:", error);
-      setStudents(mockStudents);
+    
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchStudents();
-  }, [current_session_id]);
 
-  const handleFind = () => {
+ const handleFind = () => {
+  if (
+    filterClass === "All" ||
+    filterClass !== "" ||
+    filterName ||
+    filterFatherName ||
+    filterSrNo
+  ) {
     fetchStudents();
-  };
+  }
+};
 
   // Filter students based on top form parameters
   const filteredStudentsByForms = useMemo(() => {
@@ -271,13 +205,15 @@ const StudentPromote = () => {
     });
   }, [searchedStudents, sortConfig]);
 
-  // Pagination
-  const paginatedStudents = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedStudents.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedStudents, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(sortedStudents.length / itemsPerPage);
+  // Pagination hook
+  const {
+    currentPage,
+    totalPages,
+    currentData: paginatedStudents,
+    setCurrentPage,
+    itemsPerPage,
+    changeItemsPerPage,
+  } = usePagination(sortedStudents, 10);
 
   // Checkbox interactions
   const handleSelectAll = (e) => {
@@ -404,119 +340,6 @@ const StudentPromote = () => {
 
   return (
     <div className="bg-white p-5 min-h-[85vh] text-left school-promote-container">
-      {/* Dynamic Native styles to exactly match user screenshot */}
-      <style>{`
-        .school-promote-container {
-          font-family: Arial, sans-serif;
-          color: #333;
-        }
-        .promote-title {
-          font-size: 32px;
-          font-weight: 400;
-          color: #333;
-          margin-bottom: 25px;
-          margin-top: 10px;
-        }
-        .btn-find-red {
-          color: #fff;
-          background-color: #0860C4;
-          border: 1px solid #6f87a3;
-          height: 44px;
-          padding: 6px 20px;
-          font-size: 14px;
-          font-weight: bold;
-          border-radius: 8px;
-          cursor: pointer;
-          white-space: nowrap;
-          transition: all 0.15s ease-in-out;
-          width: 100%;
-          outline: none;
-        }
-        .btn-find-red:hover {
-          background-color: #6f87a3;
-          border-color: #6f87a3;
-        }
-        .btn-promote-red {
-          color: #fff;
-          background-color: #0860C4;
-          border: 1px solid #6f87a3;
-          height: 44px;
-          padding: 6px 20px;
-          font-size: 13px;
-          font-weight: bold;
-          border-radius: 8px;
-          cursor: pointer;
-          white-space: nowrap;
-          transition: all 0.15s ease-in-out;
-          width: 100%;
-          outline: none;
-        }
-        .btn-promote-red:hover:not(:disabled) {
-          background-color: #0860C4;
-          border-color: #6f87a3;
-        }
-        .btn-promote-red:disabled {
-          background-color: #e6e6e6;
-          border-color: #ccc;
-          color: #999;
-          cursor: not-allowed;
-        }
-        .table-util-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 15px;
-          margin-top: 25px;
-        }
-        .table-search-input {
-          height: 34px;
-          width: 180px;
-          padding: 5px 10px;
-          font-size: 12px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          outline: none;
-        }
-        .show-entries-select {
-          height: 34px;
-          padding: 2px 10px;
-          font-size: 13px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          outline: none;
-          background: #fff;
-        }
-        .text-center {
-          text-align: center;
-        }
-        .text-left {
-          text-align: left;
-        }
-        .native-checkbox {
-          width: 15px;
-          height: 15px;
-          cursor: pointer;
-          margin: 0;
-          vertical-align: middle;
-        }
-        .edit-btn-blue {
-          background: #fff;
-          border: 1px solid #ccc;
-          color: #0275d8;
-          padding: 4px 8px;
-          border-radius: 4px;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .edit-btn-blue:hover {
-          background: #f0f0f0;
-          border-color: #adadad;
-        }
-        /* Sort indicators removed in favor of native inline character */
-      `}</style>
-
       {/* Page Title */}
       <h1 className="text-xl font-bold">Student Promote</h1>
 
@@ -525,7 +348,7 @@ const StudentPromote = () => {
         {/* Class Filter */}
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <ClassSelect
-            label="Class"
+            label="Class Section"
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
             options={[
@@ -576,7 +399,7 @@ const StudentPromote = () => {
           <button
             onClick={handleFind}
             disabled={loading}
-            className="btn-find-red"
+            className="bg-[#0860C4] text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm h-[42px] w-full hover:bg-opacity-90 active:scale-95 duration-150"
           >
             {loading ? "..." : "Find"}
           </button>
@@ -626,30 +449,10 @@ const StudentPromote = () => {
             <button
               onClick={handlePromote}
               disabled={promoting || selectedStudentIds.size === 0}
-              className="btn-promote-red"
+              className="bg-[#0860C4] text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm h-[42px] w-full hover:bg-opacity-90 active:scale-95 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed duration-150"
             >
               {promoting ? "Promoting..." : "Permote Selected Student"}
             </button>
-          </div>
-
-          {/* Show Entries Select */}
-          <div className="col-span-12 sm:col-span-6 md:col-span-3 flex justify-end pb-1">
-            <div style={{ fontSize: "14px", display: "flex", alignItems: "center", gap: "5px" }}>
-              <span>Show entries:</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="show-entries-select"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
           </div>
         </div>
       </div>
@@ -705,7 +508,7 @@ const StudentPromote = () => {
                 Mother's Name ⬍
               </th>
 
-           
+
 
               <th className="px-2 md:px-3 py-2 font-medium text-[14px] whitespace-nowrap cursor-pointer text-center">
                 <input
@@ -715,179 +518,82 @@ const StudentPromote = () => {
                   className="native-checkbox"
                   style={{ accentColor: "#0860C4" }}
                 />
-                <span className="ml-1">⬍</span>
+
               </th>
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan="9"
-                  className="text-center"
-                  style={{ padding: "40px" }}
-                >
-                  <div
+            {
+              paginatedStudents.length > 0 ? (
+                paginatedStudents.map((student, idx) => {
+                  const sNumber = (currentPage - 1) * itemsPerPage + idx + 1;
+                  const isSelected = selectedStudentIds.has(student.id);
+                  return (
+                    <tr key={student.id} className="text-center border-t">
+                      <td
+                        className="px-2 md:px-4 py-2 whitespace-nowrap text-center"
+                        style={{ color: "#777" }}
+                      >
+                        {sNumber}
+                      </td>
+                      <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center">
+                        {student.stu_prefix || ""}{student.student_ids || "-"}
+                      </td>
+                      <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center">
+                        {student.registerNo || "-"}
+                      </td>
+                      <td className="px-2 md:px-4 py-2 whitespace-nowrap text-left">
+                        {getClassSectionLabel(student)}
+                      </td>
+                      <td className="px-2 md:px-4 py-2 whitespace-nowrap text-left">
+                        {student.studentName}
+                      </td>
+                      <td className="px-2 md:px-4 py-2 whitespace-nowrap text-left">
+                        {student.fatherName || "-"}
+                      </td>
+                      <td className="px-2 md:px-4 py-2 whitespace-nowrap text-left">
+                        {student.motherName || "-"}
+                      </td>
+
+
+                      <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleSelectStudent(student.id)}
+                          className="native-checkbox"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td
+                    colSpan="9"
+                    className="text-center"
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: "10px",
+                      padding: "30px",
+                      color: "#999",
+                      fontStyle: "italic",
                     }}
                   >
-                    <div
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        border: "3px solid #ccc",
-                        borderBottomColor: "#337ab7",
-                        borderRadius: "50%",
-                        animation: "spin 1s linear infinite",
-                      }}
-                    ></div>
-                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                    <span style={{ fontSize: "12px", color: "#666" }}>
-                      Loading student records...
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            ) : paginatedStudents.length > 0 ? (
-              paginatedStudents.map((student, idx) => {
-                const sNumber = (currentPage - 1) * itemsPerPage + idx + 1;
-                const isSelected = selectedStudentIds.has(student.id);
-                return (
-                  <tr key={student.id} className="text-center border-t">
-                    <td
-                      className="px-2 md:px-4 py-2 whitespace-nowrap text-center"
-                      style={{ color: "#777" }}
-                    >
-                      {sNumber}
-                    </td>
-                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center">
-                      {student.stu_prefix || ""}{student.student_ids || "-"}
-                    </td>
-                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center">
-                      {student.registerNo || "-"}
-                    </td>
-                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-left">
-                      {getClassSectionLabel(student)}
-                    </td>
-                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-left">
-                      {student.studentName}
-                    </td>
-                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-left">
-                      {student.fatherName || "-"}
-                    </td>
-                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-left">
-                      {student.motherName || "-"}
-                    </td>
-               
-
-                    <td className="px-2 md:px-4 py-2 whitespace-nowrap text-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleSelectStudent(student.id)}
-                        className="native-checkbox"
-                      />
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td
-                  colSpan="9"
-                  className="text-center"
-                  style={{
-                    padding: "30px",
-                    color: "#999",
-                    fontStyle: "italic",
-                  }}
-                >
-                  No students found matching filters.
-                </td>
-              </tr>
-            )}
+                    No students found matching filters.
+                  </td>
+                </tr>
+              )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination Row */}
-      {totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            justifyItems: "center",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "15px",
-            marginTop: "15px",
-            fontSize: "14px",
-          }}
-        >
-          <div style={{ flex: "1", color: "#666" }}>
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(currentPage * itemsPerPage, sortedStudents.length)} of{" "}
-            {sortedStudents.length} entries
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              style={{
-                background: "#fff",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                padding: "6px 12px",
-                cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                opacity: currentPage === 1 ? 0.6 : 1,
-                fontSize: "13px",
-              }}
-            >
-              Previous
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                style={{
-                  background: currentPage === page ? "#337ab7" : "#fff",
-                  color: currentPage === page ? "#fff" : "#333",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  padding: "6px 12px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  fontSize: "13px",
-                }}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              style={{
-                background: "#fff",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-                padding: "6px 12px",
-                cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                opacity: currentPage === totalPages ? 0.6 : 1,
-                fontSize: "13px",
-              }}
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+      <CommonPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        totalItems={sortedStudents.length}
+        itemsPerPage={itemsPerPage}
+        onItemsPerPageChange={changeItemsPerPage}
+      />
     </div>
   );
 };

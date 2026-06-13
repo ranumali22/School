@@ -22,7 +22,7 @@ const StudentFeeDepositTable = () => {
   const [stidFilter, setSridFilter] = useState("");
   const [sectionList, setSectionList] = useState([]);
   const [filters, setFilters] = useState({
-    class: "All",
+    class: "",
     name: "",
     fatherName: "",
     srno: "",
@@ -47,9 +47,6 @@ const StudentFeeDepositTable = () => {
         }
       });
   };
-  useEffect(() => {
-    handlestudentsfee();
-  }, []);
 
   useEffect(() => {
     const autoSelectId = localStorage.getItem("autoSelectStudentId");
@@ -253,8 +250,15 @@ const StudentFeeDepositTable = () => {
             label=" Class Section"
             value={form.class_id}
             onChange={(e) => {
-              setForm({ ...form, class_id: e.target.value });
-              handlestudentsfee(e.target.value);
+              const value = e.target.value;
+
+              setForm({ ...form, class_id: value });
+
+              if (value) {
+                handlestudentsfee(value);
+              } else {
+                setStudents([]);
+              }
             }}
             options={[
               { label: "---Select Class Section---", value: "" },
@@ -280,94 +284,77 @@ const StudentFeeDepositTable = () => {
         </div>
 
         {/* Show Entries Dropdown (Top Right Corner) */}
-        <div className="col-span-12 md:col-span-3 md:col-start-10 flex justify-end items-center gap-2">
-          <span className="text-sm font-medium text-slate-500 whitespace-nowrap">
-            Show
-          </span>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => changeItemsPerPage(Number(e.target.value))}
-            className="border border-slate-300 px-2 h-[38px] rounded-xl text-sm outline-none focus:border-[#0860C4] bg-white font-medium text-slate-700 min-w-[85px] text-center"
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </div>
       </div>
       {/* Table */}
 
-      <div className="overflow-x-auto border border-slate-100 rounded-2xl shadow-sm mb-4 overflow-hidden">
-        <table className="min-w-full border-collapse border border-slate-200">
+      <div className="overflow-x-auto  overflow-hidden">
+        <table className="min-w-full table-auto border">
           <thead>
             <tr className="bg-[#0860C4] text-white text-center text-xs font-semibold uppercase tracking-wider">
               <th
-                className="px-3 py-3 border border-slate-200 whitespace-nowrap cursor-pointer"
+                className="px-3 py-3 whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("sNo")}
               >
                 # ⬍
               </th>
 
               <th
-                className="px-3 py-3 border border-slate-200 whitespace-nowrap cursor-pointer"
+                className="px-3 py-3  whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("student_ids")}
               >
                 ST ID ⬍
               </th>
 
               <th
-                className="px-3 py-3 border border-slate-200 whitespace-nowrap cursor-pointer"
+                className="px-3 py-3  whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("srNo")}
               >
                 SR No ⬍
               </th>
 
               <th
-                className="px-3 py-3 border border-slate-200 whitespace-nowrap cursor-pointer"
+                className="px-3 py-3  whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("class")}
               >
                 Class ⬍
               </th>
 
               <th
-                className="px-3 py-3 border border-slate-200 text-left whitespace-nowrap cursor-pointer"
+                className="px-3 py-3  text-left whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("students_name")}
               >
                 Name ⬍
               </th>
 
               <th
-                className="px-3 py-3 border border-slate-200 text-left whitespace-nowrap cursor-pointer"
+                className="px-3 py-3  text-left whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("fatherName")}
               >
                 Father ⬍
               </th>
 
               <th
-                className="px-3 py-3 border border-slate-200 text-right whitespace-nowrap cursor-pointer"
+                className="px-3 py-3  text-right whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("allotFee")}
               >
                 Allot Fee
               </th>
 
               <th
-                className="px-3 py-3 border border-slate-200 text-right whitespace-nowrap cursor-pointer"
+                className="px-3 py-3  text-right whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("paid")}
               >
                 Paid
               </th>
 
               <th
-                className="px-3 py-3 border border-slate-200 text-right whitespace-nowrap cursor-pointer"
+                className="px-3 py-3  text-right whitespace-nowrap cursor-pointer"
                 onClick={() => handleSort("balance")}
               >
                 Balance
               </th>
 
-              <th className="px-3 py-3 border border-slate-200 whitespace-nowrap">
-                Action
-              </th>
+              <th className="px-3 py-3  whitespace-nowrap">Action</th>
             </tr>
           </thead>
 
@@ -382,39 +369,35 @@ const StudentFeeDepositTable = () => {
                 return (
                   <tr
                     key={index}
-                    className="hover:bg-slate-50 transition-colors capitalize"
+                    className="hover:bg-slate-50 transition-colors border-t capitalize"
                   >
-                    <td className="px-3 py-3 border border-slate-200 font-medium text-slate-500">
+                    <td className="px-3 py-3  font-medium text-slate-500">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
 
-                    <td className="px-3 py-3 border border-slate-200 font-medium">
+                    <td className="px-3 py-3  font-medium">
                       {student.stu_prefix}
                       {student.student_ids}
                     </td>
 
-                    <td className="px-3 py-3 border border-slate-200 font-medium">
-                      {student.srNo}
-                    </td>
-                    <td className="px-3 py-3 border border-slate-200">
-                      {student.class}
-                    </td>
-                    <td className="px-3 py-3 border border-slate-200 text-left font-semibold text-slate-800">
+                    <td className="px-3 py-3  font-medium">{student.srNo}</td>
+                    <td className="px-3 py-3 ">{student.class}</td>
+                    <td className="px-3 py-3  text-left font-semibold text-slate-800">
                       {student.students_name}
                     </td>
-                    <td className="px-3 py-3 border border-slate-200 text-left">
+                    <td className="px-3 py-3  text-left">
                       {student.father_name}
                     </td>
-                    <td className="px-3 py-3 border border-slate-200 text-right font-medium">
+                    <td className="px-3 py-3  text-right font-medium">
                       {student.Allot}
                     </td>
-                    <td className="px-3 py-3 border border-slate-200 text-right text-green-600 font-semibold">
+                    <td className="px-3 py-3  text-right text-green-600 font-semibold">
                       {student.Paid}
                     </td>
-                    <td className="px-3 py-3 border border-slate-200 text-right text-red-600 font-bold">
+                    <td className="px-3 py-3  text-right text-red-600 font-bold">
                       {student.Balance}
                     </td>
-                    <td className="px-3 py-3 border border-slate-200">
+                    <td className="px-3 py-3 ">
                       <div className="flex justify-center gap-2 whitespace-nowrap">
                         {student.Allot > 0 ? (
                           <button
@@ -438,7 +421,7 @@ const StudentFeeDepositTable = () => {
               })
             ) : (
               <tr>
-                <td colSpan="10" className="py-8 border border-slate-200 text-slate-400">
+                <td colSpan="10" className="py-8 text-slate-400">
                   No Data Found
                 </td>
               </tr>
@@ -446,6 +429,7 @@ const StudentFeeDepositTable = () => {
           </tbody>
         </table>
       </div>
+
       <CommonPagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -453,8 +437,8 @@ const StudentFeeDepositTable = () => {
         totalItems={searchStudents.length}
         itemsPerPage={itemsPerPage}
         onItemsPerPageChange={changeItemsPerPage}
-        showShowEntries={false}
       />
+
       {/* Deposit Form */}
       {viewStudent && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center">

@@ -28,6 +28,18 @@ export const showError = (message) => {
   });
 };
 
+export const showConfirm = async (message) => {
+  return await Swal.fire({
+    icon: "warning",
+    title: "Confirm",
+    text: titleCase(message || "Are you sure?"),
+    showCancelButton: true,
+    confirmButtonText: "Yes",
+    cancelButtonText: "No",
+    reverseButtons: true,
+  });
+};
+
 export const handleApiResponse = (res) => {
   if (!res || typeof res !== "object") {
     showError("Invalid Server Response ❌");

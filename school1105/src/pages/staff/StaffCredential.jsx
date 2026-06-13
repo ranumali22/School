@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash, FaSignInAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
+import usePagination from "../../hooks/usePagination";
+import CommonPagination from "../../Component/common/Pagination";
 import { RiEdit2Fill } from "react-icons/ri";
 
 
@@ -31,6 +32,16 @@ function StaffCredential() {
         return savedEmployees ? JSON.parse(savedEmployees) : [];
 
     });
+
+    // Pagination hook
+    const {
+        currentPage,
+        totalPages,
+        currentData: paginatedEmployees,
+        setCurrentPage,
+        itemsPerPage,
+        changeItemsPerPage,
+    } = usePagination(employees, 10);
 
     useEffect(() => {
         localStorage.setItem("employees", JSON.stringify(employees));
@@ -82,13 +93,13 @@ function StaffCredential() {
                             </tr>
                         </thead>
                         <tbody>
-                            {employees.length > 0 ? (
+                            {paginatedEmployees.length > 0 ? (
 
-                                employees.map((item, index) => (
+                                paginatedEmployees.map((item, index) => (
                                     <tr key={item.id} className="bg-white border-t">
 
                                         <td className="px-2 md:px-4 py-2 whitespace-nowrap">
-                                            {index + 1}
+                                            {(currentPage - 1) * itemsPerPage + index + 1}
                                         </td>
 
                                         <td className="px-2 md:px-4 py-2 whitespace-nowrap">
@@ -130,7 +141,7 @@ function StaffCredential() {
                                     </tr>
                                 ))) : (
                                 <tr>
-                                    <td colSpan="8" className="text-center py-4">
+                                    <td colSpan="9" className="text-center py-4">
                                         No Data Found
                                     </td>
                                 </tr>
@@ -138,6 +149,14 @@ function StaffCredential() {
                         </tbody>
                     </table>
 
+                    <CommonPagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        totalItems={employees.length}
+                        itemsPerPage={itemsPerPage}
+                        onItemsPerPageChange={changeItemsPerPage}
+                    />
 
                 </div>
             </div>

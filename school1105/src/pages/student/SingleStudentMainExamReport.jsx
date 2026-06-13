@@ -243,39 +243,25 @@ const SingleStudentMainExamReport = () => {
     }
 
     return (
-        <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans pb-32 md:pb-12 overflow-x-hidden">
-            <style>{`
-                @media (max-width: 768px) {
-                    .main-content, .page-content {
-                        overflow: visible !important;
-                    }
-                    body {
-                        overflow-y: auto !important;
-                        height: auto !important;
-                    }
-                }
-            `}</style>
+        <div className=" min-h-screen font-sans  overflow-x-hidden">
+         
 
             {/* Header section */}
-            <div className="mb-8 flex flex-col gap-6 px-1 animate-in fade-in slide-in-from-top duration-700">
+            <div className="mb-5 flex flex-col gap-6 px-1 animate-in fade-in slide-in-from-top duration-700">
                 <div className="flex justify-between items-end">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="h-2 w-8 bg-indigo-600 rounded-full"></div>
-                            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Academic Transcript</span>
-                        </div>
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none">Exam Report</h2>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Performance Intelligence Hub</p>
+                      
+                        <h2 className="text-2xl  font-black text-slate-900 tracking-tighter leading-none">Exam Report</h2>
                     </div>
                     <div className="flex flex-col items-end gap-3">
-                        <button 
+                        {/* <button 
                             onClick={exportPDF}
                             className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all text-slate-400 hover:text-indigo-600 group"
                             title="Export PDF"
                         >
                             <FaFilePdf size={18} className="group-hover:scale-110 transition-transform" />
-                        </button>
-                        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
+                        </button> */}
+                        {/* <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
                             <div className="h-7 w-7 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100">
                                 <FaGraduationCap size={12} />
                             </div>
@@ -283,16 +269,16 @@ const SingleStudentMainExamReport = () => {
                                 <span className="text-[9px] font-black text-slate-400 uppercase leading-none">Verified ID</span>
                                 <span className="text-xs font-black text-slate-700 tracking-tight">{studentName}</span>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
-                <div className="bg-slate-900 p-5 rounded-[2rem] shadow-2xl shadow-slate-200 relative overflow-hidden group">
+                <div className="bg-slate-900 p-5 rounded-lg shadow-2xl shadow-slate-200 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
                         <FaChartLine size={80} className="text-white" />
                     </div>
                     <div className="relative z-10">
                         <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Live Academic Status</p>
-                        <h3 className="text-white text-lg font-bold leading-tight max-w-xs">
+                        <h3 className="text-white text-lg  leading-tight max-w-xs">
                             Monitor your grade progression and subject-wise metrics.
                         </h3>
                     </div>
@@ -300,8 +286,8 @@ const SingleStudentMainExamReport = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-8">
-                <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-5">
+                <div className="bg-white p-4 md:p-6 rounded-lg  border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
                     <div className="bg-blue-600 h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100 shrink-0">
                         <FaGraduationCap className="text-lg md:text-2xl" />
                     </div>
@@ -311,7 +297,7 @@ const SingleStudentMainExamReport = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
+                <div className="bg-white p-4 md:p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
                     <div className="bg-indigo-600 h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100 shrink-0">
                         <FaChartLine className="text-lg md:text-2xl" />
                     </div>
@@ -321,7 +307,7 @@ const SingleStudentMainExamReport = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
+                <div className="bg-white p-4 md:p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
                     <div className="bg-emerald-600 h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-100 shrink-0">
                         <FaCheckCircle className="text-lg md:text-2xl" />
                     </div>
@@ -447,7 +433,7 @@ const SingleStudentMainExamReport = () => {
                             const isPass = percentage >= 33;
 
                             return (
-                                <div key={index} className={`bg-white p-5 rounded-3xl shadow-sm border-l-4 transition-all ${isPass ? "border-l-emerald-500" : "border-l-rose-500"} border-t border-r border-b border-gray-100`}>
+                                <div key={index} className={`bg-white p-5 rounded-lg shadow-sm border-l-4 transition-all ${isPass ? "border-l-emerald-500" : "border-l-rose-500"} border-t border-r border-b border-gray-100`}>
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex-1">
                                             <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 mb-2">

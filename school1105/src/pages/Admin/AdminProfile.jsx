@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import { CommonInput } from "../../Component/common/CommonInput";
 import { FloatingInput } from "../../Component/common/FloatingInput";
 import { get_profile_school, update_school } from "../../Api";
-import imageCompression from "browser-image-compression";
 import { showError, showSuccess } from "../../Component/common/alert";
 const SchoolProfilePrint = () => {
     const [admin, setAdmin] = useState(null);
     const [formData, setFormData] = useState({});
     const [isEdit, setIsEdit] = useState(false);
     const [loading, setLoading] = useState(true);
-
     // ✅ LOAD LOCAL + API
     useEffect(() => {
         const localData = JSON.parse(localStorage.getItem("authData") || "{}");
@@ -55,66 +53,45 @@ const SchoolProfilePrint = () => {
         });
     };
 
-    // ✅ LOGO CHANGE (FILE + PREVIEW)
-    const handleLogoChange = async (e) => {
+
+    const handleLogoChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const options = {
-            maxSizeMB: 0.1,          // 🔥 100KB max
-            maxWidthOrHeight: 800,
-            useWebWorker: true,
-        };
-
-        try {
-            const compressedFile = await imageCompression(file, options);
-
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                setFormData({
-                    ...formData,
-                    upload_logo: reader.result, // ✅ compressed base64
-                });
-            };
-
-            reader.readAsDataURL(compressedFile);
-
-        } catch (error) {
-            console.log("Compression error:", error);
-        }
+        setFormData((prev) => ({
+            ...prev,
+            logoFile: file,
+            logoPreview: URL.createObjectURL(file),
+        }));
     };
-    // ✅ SAVE UPDATE (FormData)
     const handleSave = async () => {
         try {
-            if (!formData?.id) {
-                showError("ID missing ❌");
-                return;
+            const submitData = new FormData();
+
+            Object.keys(formData).forEach((key) => {
+                if (
+                    ["logoFile", "logoPreview", "id"].includes(key)
+                )
+                    return;
+
+                submitData.append(key, formData[key] ?? "");
+            });
+
+            if (formData.logoFile) {
+                submitData.append("upload_logo", formData.logoFile);
+                submitData.append("upload_type", "school_logo");
             }
 
-            const res = await update_school(formData.id, formData);
+            const res = await update_school(formData.id, submitData);
 
-            console.log("UPDATE RESPONSE:", res.data);
+            if (res.data.success) {
+                showSuccess("Updated Successfully");
 
-            if (res.data.success || res.data.message) {
-                showSuccess("Updated Successfully ✅");
-
-                // 🔥 instant UI update
-                setAdmin({ ...formData });
-                setFormData({ ...formData });
-
-                localStorage.setItem("authData", JSON.stringify(formData));
-
+                await fetchProfile();
                 setIsEdit(false);
-
-                fetchProfile();
-
-            } else {
-                showError("Update Failed ❌");
             }
-
         } catch (err) {
-            console.error(err);
+            console.log(err);
         }
     };
 
@@ -133,11 +110,9 @@ const SchoolProfilePrint = () => {
                     {/* LOGO */}
                     <img
                         src={
-                            formData.preview_logo ||
-                            (typeof formData.upload_logo === "string" && formData.upload_logo
-                                ? formData.upload_logo.startsWith("data:image") || formData.upload_logo.startsWith("http")
-                                    ? formData.upload_logo
-                                    : `${import.meta.env.VITE_SERVER_URL}/uploads/${formData.upload_logo}`
+                            formData.logoPreview ||
+                            (formData.upload_logo
+                                ? `${import.meta.env.VITE_SERVER_URL}/uploads/${formData.upload_logo}`
                                 : "/default-school.png")
                         }
                         className="w-16 h-16 rounded-full object-cover border"

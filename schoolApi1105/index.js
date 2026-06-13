@@ -7,9 +7,6 @@ const http = require("http");
 //const open = require("open").default;
 app.use(cors());
 app.use(express.json());
-
-
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.json({ limit: "10mb" })); // allow up to 10 MB
 
@@ -17,7 +14,7 @@ app.use(express.json({ limit: "10mb" })); // allow up to 10 MB
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 const { db } = require("./config/db");
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8001;
 
 const checkDbConnection = async () => {
   try {
@@ -31,6 +28,7 @@ const checkDbConnection = async () => {
     process.exit(1);
   }
 };
+
 
 function serveOffline() {
   const offlineContent = "<h1>Server is offline</h1>";
@@ -47,6 +45,8 @@ function serveOffline() {
       console.log(`Offline page served on port ${PORT}`);
     });
 }
+
+
 app.get("/", (req, res) => res.send("<h1>Server is running!</h1>"));
 
 try {

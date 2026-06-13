@@ -23,9 +23,9 @@ const menuData = [
     title: "Students",
     icon: "students",
     submenu: [
-      { title: "Attendance", path: "/students/attendance" },
-      // { title: "Students Fees", path: "/student-fees" },
-      // { title: "Previous Sessions Due Fees", path: "/student-session" },
+      { title: "Attendance", path: "/staff-student-attendance-table" },
+      { title: "Class Test", path: "/staff-classtest-table" },
+      { title: "Main Exam ", path: "/staff-exam-table" },
       // { title: "Students Bus Fare", path: "/student-bus-rent" },
       // { title: "Student Internal Exam Results", path: "/student-result" },
       // { title: "Student Main Exam Results", path: "/student-main-marks" },
@@ -35,11 +35,7 @@ const menuData = [
       // { title: "Time Table", path: "/staff/timetable" },
     ],
   },
-  {
-    title: "Teachers",
-    icon: "teachers",
-    submenu: [{ title: "All Teachers", path: "/teachers" }],
-  },
+
   {
     title: "Time Table",
     icon: "courses",
@@ -93,7 +89,6 @@ const StaffSidebar = ({ mobileOpen, setMobileOpen }) => {
 
   return (
     <>
-      {/* Overlay for mobile */}
       {mobileOpen && (
         <div
           className="overlay show"
@@ -102,21 +97,19 @@ const StaffSidebar = ({ mobileOpen, setMobileOpen }) => {
       )}
 
       <div
-        className={`sidebar 
-          ${collapsed && !mobileOpen ? "collapsed" : ""} 
-          ${mobileOpen ? "mobile-open" : ""}`}
+        className={`sidebar shrink-0
+          ${collapsed ? "collapsed" : ""} 
+           ${mobileOpen ? "mobile-open" : ""}`}
       >
-        {/* Header */}
         <div className="sidebar-header">
-          {(!collapsed || mobileOpen) && <h2>School Staff</h2>}
+          {!collapsed && <h4>School Admin</h4>}
           <Menu
             size={22}
-            className="toggle-btn hidden md:block"
+            className="toggle-btn"
             onClick={() => setCollapsed(!collapsed)}
           />
         </div>
 
-        {/* Menu */}
         <ul className="menu">
           {menuData.map((menu, index) => (
             <li key={index}>
@@ -128,12 +121,12 @@ const StaffSidebar = ({ mobileOpen, setMobileOpen }) => {
                       setOpenMenu(openMenu === menu.title ? null : menu.title)
                     }
                   >
-                    <div className="menu-left">
+                    <div className="menu-left flex items-center gap-3">
                       {iconMap[menu.icon]}
-                      {(!collapsed || mobileOpen) && <span>{menu.title}</span>}
+                      {!collapsed && <span>{menu.title}</span>}
                     </div>
 
-                    {(!collapsed || mobileOpen) && (
+                    {!collapsed && (
                       <ChevronDown
                         size={16}
                         className={`arrow ${openMenu === menu.title ? "rotate" : ""
@@ -142,8 +135,7 @@ const StaffSidebar = ({ mobileOpen, setMobileOpen }) => {
                     )}
                   </div>
 
-                  {/* Submenu */}
-                  {openMenu === menu.title && (!collapsed || mobileOpen) && (
+                  {openMenu === menu.title && !collapsed && (
                     <ul className="submenu">
                       {menu.submenu.map((sub, i) => (
                         <li key={i}>
@@ -171,9 +163,9 @@ const StaffSidebar = ({ mobileOpen, setMobileOpen }) => {
                     isActive ? "menu-item active" : "menu-item"
                   }
                 >
-                  <div className="menu-left">
+                  <div className="menu-left flex items-center gap-3">
                     {iconMap[menu.icon]}
-                    {(!collapsed || mobileOpen) && <span>{menu.title}</span>}
+                    {!collapsed && <span>{menu.title}</span>}
                   </div>
                 </NavLink>
               )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ClassSelect, FloatingInput, FloatingSelect } from "../../Component/common/FloatingInput";
 import { localurl } from "../../api/api";
 import { FaUpload, FaFileExcel } from "react-icons/fa";
@@ -62,9 +62,9 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
         fetch(localurl + "student_main_exam_details/" + school_id + "/" + session_id + "/" + class_id + "/" + subject_id + "/" + test_id)
             .then(res => res.json())
             .then(data => {
-
+                console.log("Exam class student data", data);
                 if (data.success) {
-                    let datatest = data.students_data;
+                    let datatest = data.students_data || [];
                     handleApiResponse(data)
                     if (datatest.length > 0) {
                         let maxNo = datatest[0]['marks'];
@@ -72,14 +72,23 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
                         let VivaMaxNo = datatest[0]['viva'];
                         let PracticalMaxNo = datatest[0]['practical'];
 
-
-
-
                         setForm((form) => ({ ...form, maxNo, VivaMaxNo, PracticalMaxNo }));
+                    } else {
+                        setForm((form) => ({ ...form, maxNo: "", VivaMaxNo: "", PracticalMaxNo: "" }));
                     }
-                    setStudents(data.students_data);
+                    setStudents(datatest);
 
+                } else {
+                    setStudents([]);
+                    setForm((form) => ({ ...form, maxNo: "", VivaMaxNo: "", PracticalMaxNo: "" }));
+                    showError(data.message || "No Data Found");
                 }
+            })
+            .catch((err) => {
+                console.error(err);
+                setStudents([]);
+                setForm((form) => ({ ...form, maxNo: "", VivaMaxNo: "", PracticalMaxNo: "" }));
+                showError("Error fetching data");
             });
     }
 
@@ -222,6 +231,25 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
         }
     }, [form.class_id, form.subject, form.exam]);
 
+    const filteredSubjectList = useMemo(() => {
+        if (!form.subjectHead) return subjectlist;
+
+        const group = headlist.find(
+            (item) => String(item.id) === String(form.subjectHead)
+        );
+
+        if (!group?.subject_ids) return [];
+
+        const subjectIds = String(group.subject_ids)
+            .split(",")
+            .map((id) => Number(id.trim()))
+            .filter(Boolean);
+
+        return subjectlist.filter((subject) =>
+            subjectIds.includes(Number(subject.id))
+        );
+    }, [form.subjectHead, headlist, subjectlist]);
+
 
 
 
@@ -286,7 +314,6 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
                 VivaMaxNo,
                 PracticalMaxNo } = form;
 
-            // Validate that no student marks exceed the maximum marks
             const invalidWritten = students.some(d => Number(d.student_marks) > Number(maxNo));
             const invalidViva = students.some(d => Number(d.student_viva) > Number(VivaMaxNo));
             const invalidPractical = students.some(d => Number(d.student_practical) > Number(PracticalMaxNo));
@@ -344,7 +371,7 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
                 showSuccess(`✅ ${data.message || "Saved Successfully"}`);
 
                 if (type === "exit") {
-                    refreshTable();
+                    // refreshTable();
                     setShowForm(false);
                     setStudents([]);
 
@@ -419,7 +446,7 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
                     <ClassSelect
                         label="Subject Group"
                         value={form.subjectHead}
-                        onChange={(e) => setForm({ ...form, subjectHead: e.target.value })}
+                        onChange={(e) => setForm({ ...form, subjectHead: e.target.value, subject: "" })}
                         options={[
                             { label: "---Select  Subject Group ---", value: "" },
                             ...headlist.map((record) => ({
@@ -438,7 +465,7 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
                         onChange={(e) => setForm({ ...form, subject: e.target.value })}
                         options={[
                             { label: "---Select Subject---", value: "" },
-                            ...subjectlist.map((record) => ({
+                            ...filteredSubjectList.map((record) => ({
                                 label: `${record.subject_name}`,
                                 value: record.id,
                             })),
@@ -516,15 +543,6 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
                     <tbody>
                         {students.length > 0 ? (
                             students.map((student, index) => {
-                                // const studentMarks = marks[student.id] || {};
-
-                                // const written = studentMarks.written ?? "";
-                                // const viva = studentMarks.viva ?? "";
-                                // const practical = studentMarks.practical ?? "";
-
-
-
-
                                 const total =
                                     (Number(student.student_marks) || 0) +
                                     (Number(student.student_viva) || 0) +
@@ -537,7 +555,9 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
                                 return (
                                     <tr key={student.id} className="text-center border-t">
                                         <td className="p-2 whitespace-nowrap">{index + 1}</td>
-                                        <td className="px-2 md:px-4 py-2 whitespace-nowrap">{student.student_id}</td>
+                                        <td className="px-2 md:px-4 py-2 whitespace-nowrap">
+                                            {student.stu_prefix}{student.student_ids || student.student_id}
+                                        </td>
                                         <td className="p-2 whitespace-nowrap">{student.student_name}</td>
                                         <td className="p-2 whitespace-nowrap">{student.father_name}</td>
                                         <td className="p-2 whitespace-nowrap">
@@ -603,7 +623,7 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
 
                         <button
                             onClick={() => {
-                                refreshTable();
+                                // refreshTable();
                                 setShowForm(false);
                             }}
                             className="bg-gray-500 text-white px-6 py-2 rounded whitespace-nowrap"
@@ -629,7 +649,7 @@ function AddMainExamMarks({ setShowForm, editData, refreshTable }) {
 
                         <button
                             onClick={() => {
-                                refreshTable();
+                                // refreshTable();
                                 setShowForm(false);
                             }}
                             className="bg-[#0860C4] text-white px-4 py-2 rounded whitespace-nowrap"

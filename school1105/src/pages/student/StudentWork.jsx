@@ -74,12 +74,31 @@ const StudentWork = () => {
     w.teacher_name?.toLowerCase().includes(search.toLowerCase())
   );
 
+
+  const handleDownload = async (filePath) => {
+    const url = `${imageBase}uploads/employee/${filePath}`;
+
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = filePath;
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(blobUrl);
+  };
+
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className=" min-h-screen">
+      <div className="max-w-7xl mx-auto ">
 
         {/* 🔷 RESPONSIVE CLEAN HEADER */}
-        <div className="bg-transparent md:bg-white p-2 md:p-6 rounded-xl md:border md:border-slate-100 flex flex-col gap-4 md:gap-6 mb-4 md:mb-6 transition-all">
+        <div className="p-2  rounded-lg border border-slate-100 flex flex-col gap-4  transition-all">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div className="px-1 md:px-0">
               <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Academic Work</h1>
@@ -89,21 +108,21 @@ const StudentWork = () => {
               </p>
             </div>
 
-            <div className="hidden md:flex bg-slate-50 px-5 py-3 rounded-xl border border-slate-100 items-center gap-3 transition-all">
+            {/* <div className="hidden md:flex bg-slate-50 px-5 py-3 rounded-xl border border-slate-100 items-center gap-3 transition-all">
               <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></div>
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mb-0.5">Active Account</span>
                 <span className="text-sm font-black text-slate-800 tracking-tight capitalize">{studentName.toLowerCase()}</span>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="relative md:max-w-xs">
-            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 text-xs" />
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 text-xs" />
             <input
               type="text"
               placeholder="Search tasks..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white md:bg-slate-50 border border-slate-100 focus:border-blue-600 rounded-xl outline-none text-xs transition-all placeholder:text-slate-300 font-medium"
+              className="w-full pl-10 pr-4 py-3 bg-white  border border-slate-300 focus:border-blue-600 rounded-xl outline-none text-xs transition-all placeholder:text-slate-700 font-medium"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -111,16 +130,16 @@ const StudentWork = () => {
         </div>
 
         {/* 📋 ASSIGNMENT LISTING */}
-        <div className="space-y-5 pb-12">
+        <div className="space-y-5 ">
           {loading ? (
-            <div className="bg-white p-20 rounded-[3rem] border border-slate-100 flex flex-col items-center gap-5 shadow-sm">
+            <div className="bg-white p-20 rounded-lg border border-slate-100 flex flex-col items-center gap-5 shadow-sm">
               <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin"></div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synchronizing Work...</p>
             </div>
           ) : filteredWork.length > 0 ? (
             <>
               {/* Desktop View Table (Legacy Project Format) */}
-              <div className="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div className="hidden md:block bg-white rounded-lg border border-slate-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-center border-collapse border border-slate-200">
                     <thead>
@@ -176,9 +195,9 @@ const StudentWork = () => {
               {/* Mobile View Cards (100% Perfect UI) */}
               <div className="md:hidden space-y-6">
                 {filteredWork.map((work, index) => (
-                  <div key={work.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/10 flex flex-col gap-6 relative overflow-hidden group">
+                  <div key={work.id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-xl shadow-slate-200/10 flex flex-col gap-6 relative overflow-hidden group">
                     {/* Visual Accent */}
-                    <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-600 opacity-80"></div>
+
 
                     <div className="flex justify-between items-start">
                       <div className="flex flex-col gap-1">
@@ -212,30 +231,37 @@ const StudentWork = () => {
                         </div>
                       </div>
 
-                      {work.file_path ? (
+                      {/* {work.file_path ? (
                         <a
                           href={`${imageBase}uploads/employee/${work.file_path}`}
-                          target="_blank"
-                          rel="noreferrer"
+                          download
                           className="bg-blue-600 text-white px-7 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100 active:scale-95 transition-all"
                         >
-                          View
+                          Download
                         </a>
                       ) : (
-                        <span className="text-[10px] text-slate-200 font-black uppercase tracking-widest">No File</span>
-                      )}
+                        <span className="text-[10px] text-slate-200 font-black uppercase tracking-widest">
+                          No File
+                        </span>
+                      )} */}
+                      <button
+                        onClick={() => handleDownload(work.file_path)}
+                        className="bg-blue-600 text-white px-7 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100 active:scale-95 transition-all"
+                      >
+                        Download
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            <div className="bg-white p-24 rounded-[3.5rem] border border-slate-100 text-center shadow-xl shadow-slate-200/10">
+            <div className="bg-white p-24 rounded-lg border border-slate-100 text-center shadow-xl shadow-slate-200/10">
               <div className="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8">
                 <FaBookOpen size={40} className="text-slate-200" />
               </div>
               <h3 className="text-base font-black text-slate-900 uppercase tracking-widest">No Active Work</h3>
-              <p className="text-sm text-slate-400 mt-3 font-medium max-w-xs mx-auto">You're all caught up! There are no assignments to review at the moment.</p>
+
             </div>
           )}
         </div>

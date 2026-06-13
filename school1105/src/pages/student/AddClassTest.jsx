@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ClassSelect, FloatingInput, FloatingSelect } from "../../Component/common/FloatingInput";
 import { localurl } from "../../api/api";
 import { FaUpload, FaFileExcel } from "react-icons/fa";
@@ -58,16 +58,28 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
                 console.log("class test", data);
 
                 if (data.success) {
-                    let datatest = data.students_data;
+                    let datatest = data.students_data || [];
                     handleApiResponse(data)
                     if (datatest.length > 0) {
                         let marksmacx = datatest[0]['marks'];
 
                         setForm((form) => ({ ...form, maxNo: marksmacx }));
+                    } else {
+                        setForm((form) => ({ ...form, maxNo: "" }));
                     }
-                    setStudents(data.students_data);
+                    setStudents(datatest);
 
+                } else {
+                    setStudents([]);
+                    setForm((form) => ({ ...form, maxNo: "" }));
+                    showError(data.message || "No Data Found");
                 }
+            })
+            .catch((err) => {
+                console.error(err);
+                setStudents([]);
+                setForm((form) => ({ ...form, maxNo: "" }));
+                showError("Error fetching data");
             });
     }
 
@@ -181,6 +193,25 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
         }
     }, [form.class_id, form.subject, form.test]);
 
+    const filteredSubjectList = useMemo(() => {
+        if (!form.subjectHead) return subjectlist;
+
+        const group = headlist.find(
+            (item) => String(item.id) === String(form.subjectHead)
+        );
+
+        if (!group?.subject_ids) return [];
+
+        const subjectIds = String(group.subject_ids)
+            .split(",")
+            .map((id) => Number(id.trim()))
+            .filter(Boolean);
+
+        return subjectlist.filter((subject) =>
+            subjectIds.includes(Number(subject.id))
+        );
+    }, [form.subjectHead, headlist, subjectlist]);
+
 
     const handleMarksChange = (id, value) => {
         let maxmarks = Number(form['maxNo']) || 0;
@@ -246,7 +277,7 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
                 showSuccess(`✅ ${data.message || "Saved Successfully"}`);
 
                 if (type === "exit") {
-                    refreshTable();
+                    // refreshTable();
                     setShowForm(false)
                     setStudents([]);
                 }
@@ -359,7 +390,7 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
                     <ClassSelect
                         label="  Subject Group"
                         value={form.subjectHead}
-                        onChange={(e) => setForm({ ...form, subjectHead: e.target.value })}
+                        onChange={(e) => setForm({ ...form, subjectHead: e.target.value, subject: "" })}
                         options={[
                             { label: "---Select  Subject Group ---", value: "" },
 
@@ -383,7 +414,7 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
                         options={[
                             { label: "---Select Subject---", value: "" },
 
-                            ...subjectlist.map((record) => {
+                            ...filteredSubjectList.map((record) => {
                                 return {
                                     label: `${record.subject_name}`,
                                     value: record.id,
@@ -559,7 +590,7 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
 
                         <button
                             onClick={() => {
-                                refreshTable();
+                                // refreshTable();
                                 setShowForm(false);
                             }}
                             className="bg-gray-500 text-white px-6 py-2 rounded whitespace-nowrap"
@@ -607,7 +638,7 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
                             <ClassSelect
                                 label="Select Subject Head"
                                 value={form.subjectHead}
-                                onChange={(e) => setForm({ ...form, subjectHead: e.target.value })}
+                                onChange={(e) => setForm({ ...form, subjectHead: e.target.value, subject: "" })}
                                 options={[
                                     { label: "---Select Fee Head ---", value: "" },
 
@@ -627,7 +658,7 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
                                 options={[
                                     { label: "---Select Subject---", value: "" },
 
-                                    ...subjectlist.map((record) => {
+                                    ...filteredSubjectList.map((record) => {
                                         return {
                                             label: `${record.subject_name}`,
                                             value: record.id,
@@ -651,6 +682,7 @@ function AddClassMarks({ setShowForm, editData, refreshTable }) {
                                     }),
                                 ]}
                             />
+                            
                             {/* File Upload */}
                             <FloatingInput
                                 label="Upload Excel"

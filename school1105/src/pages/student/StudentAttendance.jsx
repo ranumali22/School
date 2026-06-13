@@ -347,15 +347,8 @@ const StudentAttendance = ({
 
   const [sectionList, setSectionList] = useState([]);
   const [students, setStudents] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(100);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const [search, setSearch] = useState("");
 
-  const currentStudents = students.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(students.length / itemsPerPage);
   const school_id = localStorage.getItem("school_id");
   const session_id = localStorage.getItem("session_id");
   const today = new Date().toISOString().split("T")[0];
@@ -458,10 +451,27 @@ const StudentAttendance = ({
       })
       .catch((error) => console.error(error));
   };
-  const changeItemsPerPage = (value) => {
-    setItemsPerPage(value);
-    setCurrentPage(1);
-  };
+  const searchedStudents = React.useMemo(() => {
+    if (!search) return students;
+    const term = search.toLowerCase();
+    return students.filter((s) => {
+      return (
+        s.class_name?.toLowerCase().includes(term) ||
+        s.student_name?.toLowerCase().includes(term) ||
+        s.father_name?.toLowerCase().includes(term) ||
+        s.student_id?.toString().includes(term)
+      );
+    });
+  }, [students, search]);
+
+  const {
+    currentPage,
+    totalPages,
+    currentData: paginatedStudents,
+    setCurrentPage,
+    itemsPerPage,
+    changeItemsPerPage,
+  } = usePagination(searchedStudents, 100);
 
 
   const handleChange = (id, checked, status) => {
@@ -682,10 +692,10 @@ const StudentAttendance = ({
             </thead>
 
             <tbody>
-              {students.map((s, index) => (
+              {paginatedStudents.map((s, index) => (
                 <tr key={s.student_id + "_" + index} className="border-t">
                   <td className="px-2 md:px-4 py-2 whitespace-nowrap">
-                    {index + 1}
+                    {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
                   <td className="px-2 md:px-4 py-2 whitespace-nowrap">
                     {s.class_name}
@@ -735,7 +745,7 @@ const StudentAttendance = ({
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
-        totalItems={students.length}
+        totalItems={searchedStudents.length}
         itemsPerPage={itemsPerPage}
         onItemsPerPageChange={changeItemsPerPage}
       />

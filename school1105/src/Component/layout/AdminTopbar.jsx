@@ -45,6 +45,30 @@ const Topbar = ({ setMobileOpen }) => {
   }, []);
 
   useEffect(() => {
+
+  const handleProfileUpdate = () => {
+    const data = JSON.parse(
+      localStorage.getItem("authData") || "{}"
+    );
+
+    setSchool(data);
+  };
+
+  window.addEventListener(
+    "profileUpdated",
+    handleProfileUpdate
+  );
+
+  return () => {
+    window.removeEventListener(
+      "profileUpdated",
+      handleProfileUpdate
+    );
+  };
+
+}, []);
+
+  useEffect(() => {
     const fetchSchool = async () => {
       try {
         const res = await get_school();
@@ -112,6 +136,54 @@ const Topbar = ({ setMobileOpen }) => {
     fetchSession();
   }, []);
 
+
+useEffect(() => {
+  const handleSessionChange = async () => {
+    const school_id = localStorage.getItem("school_id");
+
+    const res = await fetch(localurl + `session/${school_id}`);
+    const data = await res.json();
+
+    if (data.success) {
+      const activeData = data.row.filter(
+        (item) => item.session_status === "Active"
+      );
+
+      setSessions(activeData);
+
+      const savedSession = JSON.parse(
+        localStorage.getItem("session_data")
+      );
+
+      if (savedSession) {
+        const updatedSession = activeData.find(
+          (s) => s.id == savedSession.id
+        );
+
+        if (updatedSession) {
+          setSelectedSession(updatedSession);
+
+          localStorage.setItem(
+            "session_data",
+            JSON.stringify(updatedSession)
+          );
+        }
+      }
+    }
+  };
+
+  window.addEventListener(
+    "sessionChanged",
+    handleSessionChange
+  );
+
+  return () =>
+    window.removeEventListener(
+      "sessionChanged",
+      handleSessionChange
+    );
+}, []);
+
   return (
     <div className="h-16 bg-[#0860C4] shadow-md flex items-center justify-between px-6 sticky top-0 z-[100]">
       <div className="flex items-center gap-5">
@@ -123,8 +195,8 @@ const Topbar = ({ setMobileOpen }) => {
 
         {/* Title */}
         <h1
-          className="topbar-school-name !text-white !text-[18px] !font-black !tracking-tight !uppercase"
-          style={{ fontFamily: "'Inter', sans-serif" }}
+          className="!text-white !text-[20px]  !uppercase "
+        // style={{ fontFamily: "'Inter', sans-serif" }}
         >
           {school?.school_name || "School Dashboard"}
         </h1>
@@ -148,7 +220,9 @@ const Topbar = ({ setMobileOpen }) => {
                   setSelectedSession(selected);
                   localStorage.setItem("session_id", selected.id);
                   localStorage.setItem("session_data", JSON.stringify(selected));
-                  window.location.href = "/dashboard";
+                  // window.location.href = "/dashboard";
+                  navigate("/dashboard");
+
                 }
               }}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"

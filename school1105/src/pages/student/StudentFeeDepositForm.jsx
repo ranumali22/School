@@ -4,7 +4,11 @@ import { FaSearch, FaFileExcel } from "react-icons/fa";
 import { MdDelete, MdPrint } from "react-icons/md";
 
 import { localurl } from "../../api/api";
-import { showError, showSuccess } from "../../Component/common/alert";
+import {
+  showError,
+  showConfirm,
+  showSuccess,
+} from "../../Component/common/alert";
 
 const FloatingInput = ({ label, name, value, onChange, type = "text" }) => {
   return (
@@ -105,8 +109,11 @@ const StudentFeeDepositForm = ({ student, closeForm, apicallback }) => {
   };
 
   const deleteReceipt = async (receiptNo) => {
-    if (!window.confirm("Are you sure you want to delete this fee receipt?"))
-      return;
+    const result = await showConfirm(
+      "Are you sure you want to delete this fee receipt?",
+    );
+
+    if (!result.isConfirmed) return;
 
     try {
       const school_id = localStorage.getItem("school_id");
@@ -174,8 +181,8 @@ const StudentFeeDepositForm = ({ student, closeForm, apicallback }) => {
 
   console.log("deposit", deposit);
   const handleCancel = () => {
-    apicallback(); 
-    closeForm(); 
+    apicallback();
+    closeForm();
   };
   return (
     <>
@@ -238,21 +245,27 @@ const StudentFeeDepositForm = ({ student, closeForm, apicallback }) => {
           {/* Fee Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200 p-4 md:p-5 rounded-2xl shadow-sm">
-              <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-blue-600 mb-1">Total Fee</p>
+              <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-blue-600 mb-1">
+                Total Fee
+              </p>
               <p className="font-bold text-xl md:text-2xl text-blue-800">
                 ₹ {student.Allot}
               </p>
             </div>
 
             <div className="bg-gradient-to-br from-green-50 to-green-100/60 border border-green-200 p-4 md:p-5 rounded-2xl shadow-sm">
-              <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-green-600 mb-1">Deposited</p>
+              <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-green-600 mb-1">
+                Deposited
+              </p>
               <p className="font-bold text-xl md:text-2xl text-green-800">
                 ₹ {student.Paid}
               </p>
             </div>
 
             <div className="bg-gradient-to-br from-red-50 to-red-100/60 border border-red-200 p-4 md:p-5 rounded-2xl shadow-sm">
-              <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-red-600 mb-1">Pending</p>
+              <p className="text-xs md:text-sm font-semibold uppercase tracking-wider text-red-600 mb-1">
+                Pending
+              </p>
               <p className="font-bold text-xl md:text-2xl text-red-800">
                 ₹ {student.Balance}
               </p>
@@ -291,6 +304,7 @@ const StudentFeeDepositForm = ({ student, closeForm, apicallback }) => {
                   <FloatingInput
                     key={data.fee_head_id}
                     label="Fee Rec."
+                    type="Number"
                     value={data.feerec}
                     onChange={(e) =>
                       handeldeposit(data.fee_head_id, e.target.value)
@@ -321,12 +335,12 @@ const StudentFeeDepositForm = ({ student, closeForm, apicallback }) => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 mt-6">
-          <button
+          {/* <button
             onClick={() => handleSubmit("continue")}
             className="bg-green-600 text-white px-6 py-2 rounded"
           >
             Save & Continue
-          </button>
+          </button> */}
 
           <button
             onClick={() => handleSubmit("exit")}

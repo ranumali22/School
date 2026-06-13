@@ -35,8 +35,8 @@ export const delete_school = (id, data) =>
     data: data,
   });
 
-export const get_profile_school = () =>
-  API.get("/profile_school");
+export const get_profile_school = (id) =>
+  API.get(`/profile_school/${id}`);
 
 export const change_password_school = (id, data) =>
   API.put(`/change_password_school/${id}`, data);
@@ -83,3 +83,8 @@ export const get_subject = () =>
   API.get("/get_subject");
 export const get_department = () =>
   API.get("/get_department");
+
+
+// Admin Login
+export const superAdminLogin = (data) =>
+  API.post("/super_admin_login", data);

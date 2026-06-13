@@ -1,5 +1,7 @@
 const { create, getAll, update, runCustomQuery } = require("../model/school_account");
-
+const sharp = require("sharp");
+const fs = require("fs");
+const path = require("path");
 const formatDateForResponse = (date) => {
   if (!date || date === "0000-00-00") return null;
   const d = new Date(date);
@@ -31,6 +33,7 @@ exports.employee = async (req, res) => {
     let rows = await getAll("employee", "*", {
       school_id,
       session_id,
+      status: "active",
     });
 
     if (rows.length > 0) {
@@ -200,9 +203,56 @@ exports.update_employee = async (req, res) => {
       }
     });
 
+    // Fix for dates saving as 1899 when empty
+    if (data.dob === "") data.dob = null;
+    if (data.dateOfJoining === "") data.dateOfJoining = null;
+    if (data.dateOfLeaving === "") data.dateOfLeaving = null;
+
+    // if (req.file) {
+    //   data.employeePhoto = req.file.filename; // 🔥 FIX
+    // }
+
     if (req.file) {
-      data.employeePhoto = req.file.filename; // 🔥 FIX
+      const employeeFolder = path.join(
+        __dirname,
+        "../uploads/employee"
+      );
+
+      if (!fs.existsSync(employeeFolder)) {
+        fs.mkdirSync(employeeFolder, { recursive: true });
+      }
+
+      const fileName = Date.now() + ".jpg";
+      const outputPath = path.join(employeeFolder, fileName);
+
+      let quality = 80;
+      let buffer;
+
+      do {
+        buffer = await sharp(req.file.buffer)
+          .resize({
+            width: 800,
+            withoutEnlargement: true,
+          })
+          .jpeg({ quality })
+          .toBuffer();
+
+        quality -= 5;
+      } while (buffer.length > 100 * 1024 && quality > 10);
+
+      fs.writeFileSync(outputPath, buffer);
+
+      data.employeePhoto = fileName;
     }
+
+    // Password validation
+    if (data.password && data.password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long"
+      });
+    }
+
     let result = await update("employee", data, id);
     if (result && result.affectedRows > 0) {
       return res.json({
@@ -228,10 +278,52 @@ exports.add_employee = async (req, res) => {
     if (req.method == "POST") {
       const data = req.body;
 
+
+
+      // if (req.file) {
+      //   photo = req.file.filename;
+      // }
+
+
       let photo = "";
 
       if (req.file) {
-        photo = req.file.filename;
+        const employeeFolder = path.join(
+          __dirname,
+          "../uploads/employee"
+        );
+
+        if (!fs.existsSync(employeeFolder)) {
+          fs.mkdirSync(employeeFolder, { recursive: true });
+        }
+
+        const fileName = Date.now() + ".jpg";
+        const outputPath = path.join(employeeFolder, fileName);
+
+        let quality = 80;
+        let buffer;
+
+        do {
+          buffer = await sharp(req.file.buffer)
+            .resize({
+              width: 800,
+              withoutEnlargement: true,
+            })
+            .jpeg({ quality })
+            .toBuffer();
+
+          quality -= 5;
+        } while (buffer.length > 100 * 1024 && quality > 10);
+
+        fs.writeFileSync(outputPath, buffer);
+
+        photo = fileName;
+
+        console.log(
+          "Compressed Employee Photo:",
+          (buffer.length / 1024).toFixed(2),
+          "KB"
+        );
       }
 
       if (!data || Object.keys(data).length === 0) {

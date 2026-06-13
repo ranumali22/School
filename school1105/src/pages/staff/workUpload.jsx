@@ -17,6 +17,8 @@ import {
 import { localurl } from "../../api/api";
 import { showSuccess, showError } from "../../Component/common/alert";
 import Swal from "sweetalert2";
+import usePagination from "../../hooks/usePagination";
+import CommonPagination from "../../Component/common/Pagination";
 
 const WorkUpload = () => {
     const [classList, setClassList] = useState([]);
@@ -27,6 +29,16 @@ const WorkUpload = () => {
     const [editId, setEditId] = useState(null);
     const [file, setFile] = useState(null);
     const [filePreview, setFilePreview] = useState(null);
+
+    // Pagination hook
+    const {
+        currentPage,
+        totalPages,
+        currentData: paginatedWorkList,
+        setCurrentPage,
+        itemsPerPage,
+        changeItemsPerPage,
+    } = usePagination(workList, 10);
 
     const [formData, setFormData] = useState({
         class_id: "",
@@ -181,26 +193,21 @@ const WorkUpload = () => {
     };
 
     return (
-        <div className="p-2 md:p-8 bg-[#F8FAFC] min-h-screen font-sans overflow-x-hidden">
-            <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
+        <div className=" min-h-screen  overflow-x-hidden">
+            <div className="max-w-7xl mx-auto  md:space-y-8">
 
                 {/* TOP HEADER CARD */}
-                <div className="bg-white p-4 md:p-8 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-6 text-center md:text-left">
+                <div className="bg-white p-4 md:p-8 rounded-lg md:rounded-lg shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-3 md:gap-6 text-center md:text-left">
                     <div className="flex flex-col md:flex-row items-center gap-4 md:gap-5">
-                        <div className="h-14 w-14 md:h-16 md:w-16 bg-blue-50 rounded-2xl flex items-center justify-center text-[#0860C4] shadow-inner">
-                            <FaFileSignature size={24} className="md:w-7 md:h-7" />
-                        </div>
+                      
                         <div>
                             <h1 className="text-xl md:text-2xl font-bold text-slate-800 ">Academic Assignments</h1>
-                            <p className="text-gray-400 text-[10px] md:text-xs font-bold tracking-widest mt-1 flex items-center justify-center md:justify-start gap-2">
-                                <span className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                                Manage student coursework
-                            </p>
+                           
                         </div>
                     </div>
                     <button
                         onClick={openAddModal}
-                        className="w-full md:w-auto px-6 md:px-8 py-3.5 md:py-4 bg-[#0860C4] text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 group"
+                        className="w-full md:w-auto px-6 md:px-8 py-3.5 md:py-4 bg-[#0860C4] text-white rounded-lg md:rounded-lg font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 group"
                     >
                         <FaPlus className="group-hover:rotate-90 transition-transform" /> Assign New Work
                     </button>
@@ -219,9 +226,9 @@ const WorkUpload = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
-                            {workList.map((work, index) => (
+                            {paginatedWorkList.map((work, index) => (
                                 <tr key={work.id} className="hover:bg-slate-50 transition-colors">
-                                    <td className="px-4 py-3 border border-slate-200 text-sm font-normal text-slate-600">{index + 1}</td>
+                                    <td className="px-4 py-3 border border-slate-200 text-sm font-normal text-slate-600">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                     <td className="px-4 py-3 border border-slate-200 whitespace-nowrap">
                                         <div className="flex flex-col gap-1 items-center">
                                             <span className="text-xs font-normal text-slate-700">
@@ -272,7 +279,7 @@ const WorkUpload = () => {
                                     </td>
                                 </tr>
                             ))}
-                            {workList.length === 0 && (
+                            {paginatedWorkList.length === 0 && (
                                 <tr>
                                     <td colSpan="5" className="px-4 py-12 text-center text-slate-400 font-bold text-sm">
                                         No Data Found
@@ -286,19 +293,19 @@ const WorkUpload = () => {
             </div>
 
             {/* MOBILE CARD VIEW */}
-            <div className="block md:hidden px-2 pb-24 space-y-4">
+            <div className="block md:hidden px-2 mt-4 space-y-4">
                 <div className="flex items-center justify-between px-2">
                     <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Recent Assignments</h2>
                     <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{workList.length} Total</span>
                 </div>
                 
-                {workList.length > 0 ? (
-                    workList.map((work, index) => (
-                        <div key={work.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {paginatedWorkList.length > 0 ? (
+                    paginatedWorkList.map((work, index) => (
+                        <div key={work.id} className="bg-white rounded-lg border border-slate-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="p-4 border-b border-slate-50 flex justify-between items-start gap-4">
                                 <div className="flex gap-3">
                                     <div className="h-10 w-10 shrink-0 bg-blue-50 rounded-xl flex items-center justify-center text-[#0860C4] font-bold text-xs shadow-inner">
-                                        {index + 1}
+                                        {(currentPage - 1) * itemsPerPage + index + 1}
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-bold text-slate-800 line-clamp-1">{work.title}</h3>
@@ -324,13 +331,13 @@ const WorkUpload = () => {
                             <div className="p-3 bg-white flex gap-2">
                                 <button 
                                     onClick={() => openEditModal(work)}
-                                    className="flex-1 py-2.5 bg-blue-50 text-[#0860C4] rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 active:bg-blue-100 transition-colors"
+                                    className="flex-1 py-2.5 bg-blue-50 text-[#0860C4] rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 active:bg-blue-100 transition-colors"
                                 >
                                     <FaEdit size={12} /> Edit
                                 </button>
                                 <button 
                                     onClick={() => handleDelete(work.id)}
-                                    className="flex-1 py-2.5 bg-rose-50 text-rose-500 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 active:bg-rose-100 transition-colors"
+                                    className="flex-1 py-2.5 bg-rose-50 text-rose-500 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 active:bg-rose-100 transition-colors"
                                 >
                                     <FaTrashAlt size={12} /> Delete
                                 </button>
@@ -345,6 +352,17 @@ const WorkUpload = () => {
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Work Found</p>
                     </div>
                 )}
+            </div>
+
+            <div className="px-2 mt-4">
+                <CommonPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    totalItems={workList.length}
+                    itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={changeItemsPerPage}
+                />
             </div>
 
             {/* MODAL - ADD / EDIT */}

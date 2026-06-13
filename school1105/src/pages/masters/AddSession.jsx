@@ -103,7 +103,17 @@ const AddSession = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      showError(sessionData.sessionName ? sessionData.startDate ? sessionData.endDate ? sessionData.displayOrder ? "" : "Display Order is required" : "End Date is required" : "Start Date is required" : "Session Name is required");
+      showError(
+        sessionData.sessionName
+          ? sessionData.startDate
+            ? sessionData.endDate
+              ? sessionData.displayOrder
+                ? ""
+                : "Display Order is required"
+              : "End Date is required"
+            : "Start Date is required"
+          : "Session Name is required",
+      );
       return;
     }
 
@@ -137,6 +147,20 @@ const AddSession = () => {
 
           if (data.success) {
             handleApiResponse(data);
+
+            // localStorage.setItem(
+            //   "session_data",
+            //   JSON.stringify({
+            //     id: edit_id,
+            //     session_name: sessionData.sessionName,
+            //     start_date: sessionData.startDate,
+            //     end_date: sessionData.endDate,
+            //     display_order: sessionData.displayOrder,
+            //     session_status: sessionData.status,
+            //   }),
+            // );
+
+            window.dispatchEvent(new Event("sessionChanged"));
             getsession(school_id);
 
             // ✅ RESET
@@ -191,8 +215,20 @@ const AddSession = () => {
             const data = JSON.parse(result);
 
             if (data.success) {
-
               handleApiResponse(data);
+              localStorage.setItem(
+                "session_data",
+                JSON.stringify({
+                  id: edit_id,
+                  session_name: sessionData.sessionName,
+                  start_date: sessionData.startDate,
+                  end_date: sessionData.endDate,
+                  display_order: sessionData.displayOrder,
+                  session_status: sessionData.status,
+                }),
+              );
+
+              window.dispatchEvent(new Event("sessionChanged"));
 
               localStorage.removeItem("manual_session");
 
@@ -209,9 +245,9 @@ const AddSession = () => {
               setErrors({});
 
               if (action === "exit") {
-                window.location.href = "/dashboard";
+                // window.location.href = "/dashboard";
+                navigate("/dashboard");
               }
-
             } else {
               handleApiResponse(data);
 
@@ -256,12 +292,44 @@ const AddSession = () => {
             row.sort((a, b) => {
               const diff = (a.display_order || 0) - (b.display_order || 0);
               if (diff === 0) {
-                const nameA = (a.class_name || a.className || a.name || a.category || a.gender || a.medium || a.nationality || a.religion || a.busRoute_name || a.busStand_name || a.subject_name || a.department || a.designation || a.shift || a.title || "") + (a.section ? " " + a.section : "");
-                const nameB = (b.class_name || b.className || b.name || b.category || b.gender || b.medium || b.nationality || b.religion || b.busRoute_name || b.busStand_name || b.subject_name || b.department || b.designation || b.shift || b.title || "") + (b.section ? " " + b.section : "");
+                const nameA =
+                  (a.class_name ||
+                    a.className ||
+                    a.name ||
+                    a.category ||
+                    a.gender ||
+                    a.medium ||
+                    a.nationality ||
+                    a.religion ||
+                    a.busRoute_name ||
+                    a.busStand_name ||
+                    a.subject_name ||
+                    a.department ||
+                    a.designation ||
+                    a.shift ||
+                    a.title ||
+                    "") + (a.section ? " " + a.section : "");
+                const nameB =
+                  (b.class_name ||
+                    b.className ||
+                    b.name ||
+                    b.category ||
+                    b.gender ||
+                    b.medium ||
+                    b.nationality ||
+                    b.religion ||
+                    b.busRoute_name ||
+                    b.busStand_name ||
+                    b.subject_name ||
+                    b.department ||
+                    b.designation ||
+                    b.shift ||
+                    b.title ||
+                    "") + (b.section ? " " + b.section : "");
                 return String(nameA).localeCompare(String(nameB));
               }
               return diff;
-            })
+            }),
           );
 
           // ✅ LOCAL STORAGE SAVE
@@ -319,7 +387,8 @@ const AddSession = () => {
 
         getsession(school_id);
 
-        window.location.href = "/dashboard";
+        // window.location.href = "/dashboard";
+        navigate("/dashboard");
       }
     } catch (data) {
       handleApiResponse(data);
@@ -414,10 +483,11 @@ const AddSession = () => {
 
                   <td className="px-2 md:px-4 py-2 whitespace-nowrap">
                     <span
-                      className={`px-2 py-1 rounded text-white ${s.session_status === "Active"
-                        ? "bg-green-500"
-                        : "bg-red-500"
-                        }`}
+                      className={`px-2 py-1 rounded text-white ${
+                        s.session_status === "Active"
+                          ? "bg-green-500"
+                          : "bg-red-500"
+                      }`}
                     >
                       {s.session_status}
                     </span>
@@ -434,7 +504,10 @@ const AddSession = () => {
                     <button
                       onClick={() => toggleStatus(index)}
                       className={`w-12 h-6 flex items-center rounded-full p-1 
-                        ${s.session_status === "Active" ? "bg-green-500" : "bg-red-500"
+                        ${
+                          s.session_status === "Active"
+                            ? "bg-green-500"
+                            : "bg-red-500"
                         }`}
                     >
                       <div
@@ -467,7 +540,11 @@ const AddSession = () => {
             {/* <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4"> */}
             <div className="grid grid-cols-2 gap-4">
               <FloatingInput
-                label={<>Session Name <span className="text-red-500">*</span></>}
+                label={
+                  <>
+                    Session Name <span className="text-red-500">*</span>
+                  </>
+                }
                 name="sessionName"
                 required
                 value={sessionData.sessionName}
@@ -478,7 +555,11 @@ const AddSession = () => {
               <FloatingInput
                 type="date"
                 required
-                label={<>Start Date <span className="text-red-500">*</span></>}
+                label={
+                  <>
+                    Start Date <span className="text-red-500">*</span>
+                  </>
+                }
                 name="startDate"
                 value={sessionData.startDate}
                 onChange={handleChange}
@@ -487,7 +568,11 @@ const AddSession = () => {
 
               <FloatingInput
                 type="date"
-                label={<>End Date <span className="text-red-500">*</span></>}
+                label={
+                  <>
+                    End Date <span className="text-red-500">*</span>
+                  </>
+                }
                 name="endDate"
                 required
                 value={sessionData.endDate}
@@ -498,7 +583,11 @@ const AddSession = () => {
               <FloatingInput
                 type="number"
                 required
-                label={<>Display Order <span className="text-red-500">*</span></>}
+                label={
+                  <>
+                    Display Order <span className="text-red-500">*</span>
+                  </>
+                }
                 name="displayOrder"
                 value={sessionData.displayOrder}
                 onChange={handleChange}
@@ -529,13 +618,9 @@ const AddSession = () => {
                     </button>
 
                     <button
-
-
-
                       onClick={() => {
                         if (typeof handleSubmit === "function") {
                           handleSubmit("exit");
-
                         }
                       }}
                       value="exit"
@@ -577,5 +662,3 @@ const AddSession = () => {
 };
 
 export default AddSession;
-
-

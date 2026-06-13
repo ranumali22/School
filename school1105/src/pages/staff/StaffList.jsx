@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { RiEdit2Fill, RiKey2Fill } from "react-icons/ri";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import usePagination from "../../hooks/usePagination";
+import CommonPagination from "../../Component/common/Pagination";
 import { MdToggleOn } from "react-icons/md";
 import { MdToggleOff } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
@@ -22,6 +24,31 @@ import {
   handleApiResponse,
 } from "../../Component/common/alert";
 
+const getStoredSchool = () => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("school") || localStorage.getItem("authData") || "{}",
+    );
+  } catch {
+    return {};
+  }
+};
+
+const getUploadUrl = (path, folder = "") => {
+  if (!path) return "";
+  const value = String(path);
+  if (value.startsWith("data:") || value.startsWith("http") || value.startsWith("blob:")) {
+    return value;
+  }
+
+  const cleanPath = value.replace(/^\/+/, "");
+  if (cleanPath.startsWith("uploads/")) {
+    return `${imageBase}${cleanPath}`;
+  }
+
+  return `${imageBase}uploads/${folder}${cleanPath}`;
+};
+
 const formatDate = (date) => {
   if (!date || date.includes("1899") || date.startsWith("0000")) return "";
   if (date.includes("T")) {
@@ -38,6 +65,16 @@ function StaffList() {
   const [showPassword, setShowPassword] = useState({});
   const [activeForm, setActiveForm] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // Pagination hook
+  const {
+    currentPage,
+    totalPages,
+    currentData: paginatedEmployees,
+    setCurrentPage,
+    itemsPerPage,
+    changeItemsPerPage,
+  } = usePagination(employees, 10);
 
   const openForm = (type, employee) => {
     setSelectedEmployee(employee);
@@ -311,7 +348,8 @@ function StaffList() {
     const buttons = input.querySelectorAll("button");
     buttons.forEach((btn) => (btn.style.display = "none"));
 
-    const school = JSON.parse(localStorage.getItem("school"));
+    const school = getStoredSchool();
+    const schoolLogo = getUploadUrl(school?.upload_logo);
 
     const printWindow = window.open("", "_blank");
 
@@ -376,12 +414,12 @@ function StaffList() {
             </div>
 
             <div style="display:flex; align-items:center; margin-top:10px;">
-              <img src="${school?.upload_logo || ""}" style="height:60px; width:60px;" />
+              ${schoolLogo ? `<img src="${schoolLogo}" style="height:60px; width:60px; object-fit:contain;" />` : ""}
               
               <div style="flex:1; text-align:center;">
                 <h2 style="margin:0;">${school?.school_name || ""}</h2>
                 <p style="margin:0; font-size:12px;">${school?.address || ""}</p>
-                <p style="margin:0; font-size:12px;">Contact: ${school?.phone || ""}</p>
+                <p style="margin:0; font-size:12px;">Contact: ${school?.phone || school?.mobile_no || school?.helpLine_no || ""}</p>
               </div>
             </div>
           </div>
@@ -464,10 +502,10 @@ function StaffList() {
               </tr>
             </thead>
             <tbody>
-              {employees.map((item, index) => (
+              {paginatedEmployees.map((item, index) => (
                 <tr key={item.id} className="border-t text-center">
                   <td className="px-2 md:px-4 py-2 whitespace-nowrap">
-                    {index + 1}
+                    {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
 
                   <td className="px-2 md:px-4 py-2 whitespace-nowrap">
@@ -578,7 +616,9 @@ function StaffList() {
                                     </div>
                                     <div className="flex flex-col">
                                       <span className="text-sm font-semibold text-gray-900 ">Login Id</span>
-                                      <p className="text-gray-700">{item.loginId}</p>
+                                      <p className="text-gray-700"> {item.stu_prefix}
+
+                                        {item.employee_id}</p>
                                     </div>
                                     <div className="flex flex-col">
                                       <span className="text-sm font-semibold text-gray-900 ">Password</span>
@@ -767,6 +807,8 @@ function StaffList() {
             </tbody>
           </table>
 
+
+
           {activeForm && (
             <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
               <div className="bg-white rounded-xl w-[600px] p-6 relative">
@@ -804,6 +846,14 @@ function StaffList() {
             </div>
           )}
         </div>
+        <CommonPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={employees.length}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={changeItemsPerPage}
+        />
       </div>
     </section >
   );

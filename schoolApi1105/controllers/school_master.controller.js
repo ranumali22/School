@@ -493,7 +493,7 @@ exports.class_detail = async (req, res) => {
         ...cd,
         section: sectionData?.section || null,
         class_name: classData?.class_name || null,
-        teacher_name: teacher ? teacher.employeeFullName : null,
+        teacher_name: teacher ? (teacher.employeeFullName || teacher.name || teacher.employeeName) : null,
 
         // 🔥 final output (frontend ready)
         full_class_name: `${classData?.class_name || "Class"} - ${sectionData?.section || ""}`,

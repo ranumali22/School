@@ -78,7 +78,7 @@ const NotificationPage = () => {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="min-h-[calc(100dvh-120px)] md:h-screen flex flex-col bg-gray-50">
       {/* 🔷 TOP BAR */}
       <div className="flex flex-col md:flex-row items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-[#0860C4] md:bg-white text-white md:text-inherit border-b border-white/10 md:border-slate-200 sticky top-0 z-10">
         <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
@@ -107,7 +107,7 @@ const NotificationPage = () => {
       </div>
 
       {/* 🔷 MAIN CONTENT */}
-      <div className="flex flex-1 overflow-hidden md:p-6 gap-6">
+      <div className="relative flex flex-1 overflow-hidden md:p-6 gap-6">
         {/* 🔹 LEFT LIST */}
         <div className="w-full md:w-[360px] bg-white md:rounded-xl md:border md:border-slate-200 shadow-sm flex flex-col overflow-hidden">
           <div className="p-4 border-b border-slate-100 bg-slate-50/50">
@@ -117,7 +117,7 @@ const NotificationPage = () => {
             </h3>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pb-24 md:pb-0">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 md:h-full p-8 text-center opacity-40">
                 <FaInbox size={48} className="text-slate-300 mb-3" />
@@ -170,9 +170,9 @@ const NotificationPage = () => {
         </div>
 
         {/* 🔹 RIGHT VIEW / MOBILE READER */}
-        <div className={`flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-col
+        <div className={`flex-1 bg-white md:rounded-xl md:border md:border-slate-200 shadow-sm overflow-hidden flex-col
           ${selected ? 'flex' : 'hidden md:flex'} 
-          fixed md:relative inset-0 md:inset-auto z-[100] md:z-auto`}>
+          absolute md:relative inset-0 md:inset-auto z-40 md:z-auto`}>
           {!selected ? (
             <div className="flex flex-col items-center justify-center h-full text-center p-12 opacity-30">
               <FaEnvelopeOpen size={64} className="text-slate-200 mb-6" />
@@ -182,16 +182,16 @@ const NotificationPage = () => {
           ) : (
             <>
               {/* Header */}
-              <div className="p-4 md:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-                <div className="flex items-center gap-3 md:gap-4">
-                  <button onClick={() => setSelected(null)} className="md:hidden h-9 w-9 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
+              <div className="px-4 py-3 md:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+                <div className="flex items-center gap-2.5 md:gap-4 min-w-0">
+                  <button onClick={() => setSelected(null)} className="md:hidden h-9 w-9 bg-slate-100 rounded-full flex shrink-0 items-center justify-center text-slate-600">
                     <FaChevronRight className="rotate-180" size={14} />
                   </button>
-                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg md:rounded-xl bg-[#0860C4] flex items-center justify-center text-white shadow-md shrink-0">
+                  <div className="h-9 w-9 md:h-12 md:w-12 rounded-lg md:rounded-xl bg-[#0860C4] flex items-center justify-center text-white shadow-md shrink-0">
                     <FaEnvelopeOpen size={16} className="md:w-5 md:h-5" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-sm md:text-lg font-bold text-slate-900 truncate">{selected.title}</h3>
+                    <h3 className="text-[13px] md:text-lg font-bold text-slate-900 leading-snug line-clamp-2 md:truncate">{selected.title}</h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="flex items-center gap-1 text-[9px] md:text-[11px] font-bold text-[#0860C4] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
                         {new Date(selected.date).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}
@@ -203,20 +203,20 @@ const NotificationPage = () => {
               </div>
 
               {/* Body */}
-              <div className="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50/30 custom-scrollbar">
-                <div className="max-w-3xl mx-auto bg-white p-6 md:p-12 rounded-xl md:rounded-3xl shadow-sm border border-slate-100 min-h-full flex flex-col">
+              <div className="flex-1 p-3 pb-24 md:p-8 overflow-y-auto bg-slate-50/70 custom-scrollbar">
+                <div className="max-w-3xl mx-auto bg-white p-4 md:p-12 rounded-2xl md:rounded-3xl shadow-sm border border-slate-100 md:min-h-full flex flex-col">
                   {/* Notice Content */}
                   <div className="flex-1">
-                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6 md:mb-8 leading-tight border-b border-slate-50 pb-4">
+                    <h2 className="text-lg md:text-2xl font-bold text-slate-900 mb-4 md:mb-8 leading-tight border-b border-slate-50 pb-4">
                       {selected.title}
                     </h2>
-                    <div className="text-slate-700 leading-relaxed text-sm md:text-base whitespace-pre-line bg-slate-50 p-5 md:p-8 rounded-xl border border-slate-200 font-medium md:font-normal">
+                    <div className="text-slate-700 leading-relaxed text-sm md:text-base whitespace-pre-line bg-slate-50 p-4 md:p-8 rounded-xl border border-slate-200 font-medium md:font-normal">
                       {selected.messages}
                     </div>
                   </div>
 
                   {/* Authorization Footer */}
-                  <div className="mt-12 md:mt-16 pt-8 border-t border-slate-100 flex flex-col items-center">
+                  <div className="mt-8 md:mt-16 pt-6 md:pt-8 border-t border-slate-100 flex flex-col items-center">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-4 md:mb-6">Authorized By</p>
                     <div className="flex items-center gap-3 md:gap-4 px-4 md:px-6 py-2.5 md:py-3 bg-slate-50 rounded-xl border border-slate-200">
                       <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg bg-[#0860C4] flex items-center justify-center text-white text-xs md:text-sm font-bold shadow-sm">
@@ -227,7 +227,7 @@ const NotificationPage = () => {
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Management</p>
                       </div>
                     </div>
-                    <p className="text-[9px] text-slate-300 mt-8 md:mt-10 font-medium">
+                    <p className="text-[9px] text-slate-300 mt-6 md:mt-10 font-medium">
                       Notice ID: #{selected.id.toString().padStart(6, '0')}
                     </p>
                   </div>
@@ -238,21 +238,7 @@ const NotificationPage = () => {
         </div>
       </div>
 
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #E2E8F0;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #CBD5E1;
-        }
-      `}</style>
+     
     </div>
   );
 };

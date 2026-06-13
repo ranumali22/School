@@ -13,7 +13,7 @@ const PreviousDueFeeTable = () => {
   const [loading, setLoading] = useState(false);
 
   const [filters, setFilters] = useState({
-    class: "All",
+    class: "Select Class Section",
     search: "",
   });
 
@@ -26,18 +26,18 @@ const PreviousDueFeeTable = () => {
     setLoading(true);
 
     // Fetch previous due fees
-    fetch(`${localurl}previous_due_fees/${school_id}/${session_id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setStudents(data.data || []);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching previous due fees:", err);
-        setLoading(false);
-      });
+    // fetch(`${localurl}previous_due_fees/${school_id}/${session_id}`)
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     if (data.success) {
+    //       setStudents(data.data || []);
+    //     }
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     console.error("Error fetching previous due fees:", err);
+    //     setLoading(false);
+    //   });
 
     // Fetch sessions
     fetch(`${localurl}session/${school_id}`)
@@ -72,6 +72,26 @@ const PreviousDueFeeTable = () => {
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
+  const handleFind = () => {
+    setLoading(true);
+
+    fetch(`${localurl}previous_due_fees/${school_id}/${session_id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setStudents(data.data || []);
+        } else {
+          setStudents([]);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setStudents([]);
+        setLoading(false);
+      });
   };
 
   const [sortConfig, setSortConfig] = useState({
@@ -167,7 +187,7 @@ const PreviousDueFeeTable = () => {
             value={filters.class}
             onChange={handleFilterChange}
             options={[
-              "All",
+              "Select Class Section",
               ...sectionList.map((record) => {
                 const cls = classList.find(
                   (c) => String(c.id) === String(record.class_id),
@@ -193,154 +213,122 @@ const PreviousDueFeeTable = () => {
 
         {/* Find Button */}
         <div className="col-span-12 md:col-span-2">
-          <button className="bg-[#0860C4] hover:bg-[#6f87a3] text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm h-[42px] w-full">
+          <button
+            onClick={handleFind}
+            className="bg-[#0860C4] text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm h-[42px] w-full"
+          >
             Find
           </button>
         </div>
 
         {/* Show Entries Dropdown (Top Right Corner) */}
-        <div className="col-span-12 md:col-span-2 md:col-start-11 flex justify-end items-center gap-2">
-          <span className="text-sm font-medium text-slate-500 whitespace-nowrap">
-            Show
-          </span>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => changeItemsPerPage(Number(e.target.value))}
-            className="border border-slate-300 px-2 h-[38px] rounded-xl text-sm outline-none focus:border-[#0860C4] focus:ring-2 focus:ring-blue-500/10 bg-white font-medium text-slate-700 min-w-[85px] text-center"
-          >
-            <option value={10}>10</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-            <option value={500}>500</option>
-          </select>
-        </div>
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto border border-slate-100 rounded-2xl shadow-sm mb-4">
-        <table className="min-w-full border-collapse border border-slate-200">
+      <div className="overflow-x-auto">
+        <table className="min-w-full table-auto border">
           <thead>
             <tr className="bg-[#0860C4] text-white text-center text-xs font-semibold uppercase tracking-wider">
-              <th className="px-3 py-3 border border-slate-200">S.N.</th>
+              <th className="px-3 py-3 ">S.N.</th>
               <th
-                className="px-3 py-3 border border-slate-200 cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("student_ids")}
               >
                 ST ID ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("registerNo")}
               >
                 SR. NO. ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 text-left cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  text-left cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("studentName")}
               >
                 Name ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 text-left cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  text-left cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("fatherName")}
               >
                 Father's Name ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("primaryNo")}
               >
                 Mobile No. ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("class")}
               >
                 Class ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("session_name")}
               >
                 Session ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 text-right cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  text-right cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("Allot")}
               >
                 Allot Fees ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 text-right cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  text-right cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("Paid")}
               >
                 Deposited ⬍
               </th>
               <th
-                className="px-3 py-3 border border-slate-200 text-right cursor-pointer whitespace-nowrap"
+                className="px-3 py-3  text-right cursor-pointer whitespace-nowrap"
                 onClick={() => handleSort("Balance")}
               >
                 Pending ⬍
               </th>
-              <th className="px-3 py-3 border border-slate-200">Detail</th>
+              <th className="px-3 py-3 ">Detail</th>
             </tr>
           </thead>
           <tbody className="text-sm text-slate-700 text-center">
-            {loading ? (
-              <tr>
-                <td
-                  colSpan="14"
-                  className="py-8 border border-slate-200 font-medium text-slate-400"
-                >
-                  Loading previous session dues...
-                </td>
-              </tr>
-            ) : currentData.length > 0 ? (
+            {currentData.length > 0 ? (
               currentData.map((stu, index) => (
-                <tr key={index} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-3 py-3 border border-slate-200 font-medium text-slate-500">
+                <tr
+                  key={index}
+                  className="hover:bg-slate-50 transition-colors border-t"
+                >
+                  <td className="px-3 py-3  font-medium text-slate-500">
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
-                  <td className="px-3 py-3 border border-slate-200 font-medium">
+                  <td className="px-3 py-3  font-medium">
                     {stu.stu_prefix}
                     {stu.student_ids}
                   </td>
-                  <td className="px-3 py-3 border border-slate-200 font-medium">
+                  <td className="px-3 py-3  font-medium">
                     {stu.registerNo || ""}
                   </td>
-                  <td className="px-3 py-3 border border-slate-200 text-left font-semibold text-slate-800">
+                  <td className="px-3 py-3  text-left font-semibold text-slate-800">
                     {stu.studentName}
                   </td>
-                  <td className="px-3 py-3 border border-slate-200 text-left">
-                    {stu.fatherName}
-                  </td>
-                  <td className="px-3 py-3 border border-slate-200">
-                    {stu.primaryNo}
-                  </td>
-                  <td className="px-3 py-3 border border-slate-200">
-                    {stu.class}
-                  </td>
-                  <td className="px-3 py-3 border border-slate-200 font-medium text-slate-600">
+                  <td className="px-3 py-3  text-left">{stu.fatherName}</td>
+                  <td className="px-3 py-3 ">{stu.primaryNo}</td>
+                  <td className="px-3 py-3 ">{stu.class}</td>
+                  <td className="px-3 py-3  font-medium text-slate-600">
                     {stu.session_name}
                   </td>
-                  <td className="px-3 py-3 border border-slate-200 text-right font-medium">
+                  <td className="px-3 py-3  text-right font-medium">
                     {Number(stu.Allot).toFixed(2)}
                   </td>
-                  <td className="px-3 py-3 border border-slate-200 text-right text-green-600 font-semibold">
+                  <td className="px-3 py-3  text-right text-green-600 font-semibold">
                     {Number(stu.Paid).toFixed(2)}
                   </td>
-                  <td className="px-3 py-3 border border-slate-200 text-right text-red-600 font-bold">
+                  <td className="px-3 py-3  text-right text-red-600 font-bold">
                     {Number(stu.Balance).toFixed(2)}
                   </td>
-                  <td className="px-3 py-3 border border-slate-200">
-                    {/* <button
-                      onClick={() => handleDetailClick(stu)}
-                      title="View Student Pending Fees Detail"
-                      className="p-2 text-[#0860C4] hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all"
-                    >
-                      <FaEye size={18} />
-                    </button> */}
-
+                  <td className="px-3 py-3 ">
                     <button
                       onClick={() => handleDetailClick(stu)}
                       title="View Student Pending Fees Detail"
@@ -357,10 +345,7 @@ const PreviousDueFeeTable = () => {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan="14"
-                  className="py-8 border border-slate-200 text-slate-400"
-                >
+                <td colSpan="14" className="py-8  text-slate-400">
                   No previous sessions due fees found.
                 </td>
               </tr>
@@ -376,7 +361,6 @@ const PreviousDueFeeTable = () => {
         totalItems={filteredStudents.length}
         itemsPerPage={itemsPerPage}
         onItemsPerPageChange={changeItemsPerPage}
-        showShowEntries={false}
       />
     </div>
   );

@@ -123,9 +123,9 @@ function ClassDetailTable() {
           ? formData.room_number
             ? formData.teacher_name
               ? formData.display_order
-                
-                  ? ""
-                 
+
+                ? ""
+
                 : "Display Order is required"
               : "Teacher Name is required"
             : "Room Number is required"
@@ -495,25 +495,7 @@ function ClassDetailTable() {
                 <tr key={index} className="text-center border-t">
                   <td className="p-2">{index + 1}</td>
                   <td className="p-2">
-                    {(() => {
-                      const record = records.find((r) => r.id === c.class_id);
-
-                      const cls = classList.find(
-                        (cls) =>
-                          Number(cls.id ?? cls.class_id) ===
-                          Number(record?.class_id),
-                      );
-
-                      const className =
-                        cls?.className ||
-                        cls?.name ||
-                        cls?.class_name ||
-                        "Class";
-
-                      return record
-                        ? `${className} - ${record.section}`
-                        : c.class_id;
-                    })()}
+                    {c.full_class_name || c.class_id}
                   </td>
                   <td className="p-2">{c.room_number}</td>
                   <td className="p-2">{c.teacher_name}</td>

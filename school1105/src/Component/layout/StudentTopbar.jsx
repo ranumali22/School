@@ -123,7 +123,7 @@ const StudentTopbar = ({ setMobileOpen }) => {
 
   return (
     <div className="h-[74px] md:h-16 bg-[#0860C4] shadow-md flex items-center justify-between px-4 md:px-6 sticky top-0 z-[100] pt-2 md:pt-0 w-full">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center ">
         <Menu
           className="mobile-menu-btn text-white cursor-pointer active:scale-95 transition-transform"
           onClick={() => setMobileOpen((prev) => !prev)}
@@ -131,17 +131,19 @@ const StudentTopbar = ({ setMobileOpen }) => {
         />
 
         {/* School Logo & Title */}
-        <div className="hidden md:flex items-center gap-3">
-          {school?.upload_logo && (
+        <div className="md:flex items-center">
+          {/* {school?.upload_logo && (
             <img
               src={`${imageBase}uploads/employee/${school.upload_logo}`}
               alt="School Logo"
               className="w-10 h-10 object-contain rounded-full bg-white p-1 shrink-0 border border-white/20"
             />
-          )}
+          )} */}
           <h1
-            className="topbar-school-name !text-white !text-[16px] md:!text-[18px] !font-black !tracking-tight !uppercase line-clamp-1"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+          
+          className="!text-white !text-[20px]  !uppercase "
+
+          // style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {school?.school_name || "Student Dashboard"}
           </h1>
@@ -152,7 +154,7 @@ const StudentTopbar = ({ setMobileOpen }) => {
         {/* NOTIFICATION */}
         <div className="relative">
           {/* 🔔 BELL */}
-          <div
+          {/* <div
             className="relative cursor-pointer p-2 rounded-full hover:bg-white/20 transition"
             onClick={() => {
               if (window.innerWidth < 768) {
@@ -162,18 +164,29 @@ const StudentTopbar = ({ setMobileOpen }) => {
               }
             }}
           >
+          </div> */}
+          <div
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setNotifOpen(!notifOpen);
+            }}
+          >
             <Bell className="text-white" size={24} />
-
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full shadow">
-                {unreadCount}
-              </span>
-            )}
           </div>
+
+          {/* <Bell className="text-white" size={24} /> */}
+
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full shadow">
+              {unreadCount}
+            </span>
+          )}
+
 
           {/* 🔽 PREMIUM DROPDOWN */}
           {notifOpen && (
-            <div className="absolute right-0 mt-4 w-[calc(100vw-32px)] md:w-[380px] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-2xl overflow-hidden z-50 border border-gray-100 animate-in fade-in zoom-in duration-200">
+            <div className="absolute right-0 top-full mt-2 w-[320px] max-w-[95vw] md:w-[380px] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-2xl overflow-hidden z-[9999] border border-gray-100 animate-in fade-in zoom-in duration-200">
               {/* HEADER */}
               <div className="flex justify-between items-center px-5 py-4 border-b bg-gray-50/50">
                 <div className="flex items-center gap-2">

@@ -1,19 +1,29 @@
 const db = require("../database/database");
 const { array } = require("../middleware/upload");
+
+const sharp = require("sharp");
+const fs = require("fs");
+const path = require("path");
 const {
   sendNotificationHelper,
   sendAttendanceNotification,
 } = require("../utils/helper.js");
 
-const { create, getAll, update, runCustomQuery, deleteData } = require("../model/school_account");
+const {
+  create,
+  getAll,
+  update,
+  runCustomQuery,
+  deleteData,
+} = require("../model/school_account");
 
 const formatDateForResponse = (date) => {
   if (!date || date === "0000-00-00") return null;
   const d = new Date(date);
-  if (isNaN(d.getTime())) return typeof date === 'string' ? date : null;
+  if (isNaN(d.getTime())) return typeof date === "string" ? date : null;
   const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
@@ -22,8 +32,6 @@ const formatDOBPassword = (dob) => {
   const [year, month, day] = dob.split("-");
   return `${day}${month}${year}`;
 };
-
-
 
 exports.students = async (req, res) => {
   try {
@@ -85,7 +93,9 @@ exports.students = async (req, res) => {
               }
             }
             let dob = formatDateForResponse(rdata["dob"]);
-            let registerAdmissionDate = formatDateForResponse(rdata["registerAdmissionDate"]);
+            let registerAdmissionDate = formatDateForResponse(
+              rdata["registerAdmissionDate"],
+            );
             return { ...rdata, dob, registerAdmissionDate, section_class };
           } catch (err) {
             return { ...rdata, section_class: null };
@@ -112,8 +122,6 @@ exports.students = async (req, res) => {
     });
   }
 };
-
-
 
 exports.student_by_id = async (req, res) => {
   try {
@@ -177,7 +185,9 @@ exports.student_by_id = async (req, res) => {
       data: {
         ...student,
         dob: formatDateForResponse(student.dob),
-        registerAdmissionDate: formatDateForResponse(student.registerAdmissionDate),
+        registerAdmissionDate: formatDateForResponse(
+          student.registerAdmissionDate,
+        ),
         section_class,
       },
     });
@@ -188,8 +198,6 @@ exports.student_by_id = async (req, res) => {
     });
   }
 };
-
-
 
 const checkRequiredFields = (obj, fields) => {
   let missing = [];
@@ -202,7 +210,6 @@ const checkRequiredFields = (obj, fields) => {
 
   return missing;
 };
-
 
 exports.add_students = async (req, res) => {
   try {
@@ -270,11 +277,19 @@ exports.add_students = async (req, res) => {
         }
 
         // Default DOB to null if not provided
-        if (!student.dob || student.dob === "" || student.dob === "0000-00-00") {
+        if (
+          !student.dob ||
+          student.dob === "" ||
+          student.dob === "0000-00-00"
+        ) {
           student.dob = null;
         }
         // Default Admission Date to null if not provided
-        if (!student.registerAdmissionDate || student.registerAdmissionDate === "" || student.registerAdmissionDate === "0000-00-00") {
+        if (
+          !student.registerAdmissionDate ||
+          student.registerAdmissionDate === "" ||
+          student.registerAdmissionDate === "0000-00-00"
+        ) {
           student.registerAdmissionDate = null;
         }
 
@@ -283,7 +298,6 @@ exports.add_students = async (req, res) => {
         student.password = formatDOBPassword(student.dob);
         student.stu_prefix = s_prefix;
         student.status = student.status || "active";
-
 
         let result = await create("students", student);
         if (result) inserted.push(student);
@@ -299,8 +313,41 @@ exports.add_students = async (req, res) => {
 
     // ================= SINGLE =================
     else {
+      // if (req.files && req.files.photo) {
+      //   data.photo = req.files.photo[0].filename;
+      // }
+
       if (req.files && req.files.photo) {
-        data.photo = req.files.photo[0].filename;
+        const studentFolder = path.join(
+          __dirname,
+          "../uploads/student"
+        );
+
+        if (!fs.existsSync(studentFolder)) {
+          fs.mkdirSync(studentFolder, { recursive: true });
+        }
+
+        const fileName = Date.now() + ".jpg";
+        const outputPath = path.join(studentFolder, fileName);
+
+        let quality = 80;
+        let buffer;
+
+        do {
+          buffer = await sharp(req.files.photo[0].buffer)
+            .resize({
+              width: 800,
+              withoutEnlargement: true,
+            })
+            .jpeg({ quality })
+            .toBuffer();
+
+          quality -= 5;
+        } while (buffer.length > 100 * 1024 && quality > 10);
+
+        fs.writeFileSync(outputPath, buffer);
+
+        data.photo = fileName;
       }
 
       let missing = checkRequiredFields(data, requiredFields);
@@ -351,7 +398,11 @@ exports.add_students = async (req, res) => {
       }
 
       // ✅ Default Admission Date to null if not provided
-      if (!data.registerAdmissionDate || data.registerAdmissionDate === "" || data.registerAdmissionDate === "0000-00-00") {
+      if (
+        !data.registerAdmissionDate ||
+        data.registerAdmissionDate === "" ||
+        data.registerAdmissionDate === "0000-00-00"
+      ) {
         data.registerAdmissionDate = null;
       }
 
@@ -375,8 +426,6 @@ exports.add_students = async (req, res) => {
     });
   }
 };
-
-
 
 exports.upload_students_excel = async (req, res) => {
   try {
@@ -492,7 +541,6 @@ exports.upload_students_excel = async (req, res) => {
           continue;
         }
 
-
         // ✅ FINAL DATA
         let student = {
           school_id,
@@ -526,7 +574,9 @@ exports.upload_students_excel = async (req, res) => {
           student_ids: student_ids,
           loginid: s_prefix + student_ids.toString(),
           dob: item.dob && item.dob !== "" ? item.dob : null,
-          password: formatDOBPassword(item.dob && item.dob !== "" ? item.dob : null),
+          password: formatDOBPassword(
+            item.dob && item.dob !== "" ? item.dob : null,
+          ),
           // password: formatDOBPassword(item.dob),
           stu_prefix: s_prefix,
           status: "active",
@@ -565,23 +615,68 @@ exports.update_students = async (req, res) => {
     const data = {};
 
     // Clean data: only keep strings or numbers to avoid [object Object] errors
-    Object.keys(rawData).forEach(key => {
+    Object.keys(rawData).forEach((key) => {
       // Exclude non-database fields
-      if (['upload_type', 'id', 'logoPreview', 'logoFile'].includes(key)) return;
+      if (["upload_type", "id", "logoPreview", "logoFile"].includes(key))
+        return;
 
-      if (typeof rawData[key] === 'string' || typeof rawData[key] === 'number') {
+      if (
+        typeof rawData[key] === "string" ||
+        typeof rawData[key] === "number"
+      ) {
         data[key] = rawData[key];
       }
     });
 
+    // if (req.file) {
+    //   data.photo = req.file.filename;
+    // }
+
     if (req.file) {
-      data.photo = req.file.filename;
+      const studentFolder = path.join(
+        __dirname,
+        "../uploads/student"
+      );
+
+      if (!fs.existsSync(studentFolder)) {
+        fs.mkdirSync(studentFolder, { recursive: true });
+      }
+
+      const fileName = Date.now() + ".jpg";
+      const outputPath = path.join(studentFolder, fileName);
+
+      let quality = 80;
+      let buffer;
+
+      do {
+        buffer = await sharp(req.file.buffer)
+          .resize({
+            width: 800,
+            withoutEnlargement: true,
+          })
+          .jpeg({ quality })
+          .toBuffer();
+
+        quality -= 5;
+      } while (buffer.length > 100 * 1024 && quality > 10);
+
+      fs.writeFileSync(outputPath, buffer);
+
+      data.photo = fileName;
     }
 
     if (!data || Object.keys(data).length === 0) {
       return res.json({
         success: false,
         message: "No data received ❌",
+      });
+    }
+
+    // Manual password validation
+    if (data.password && data.password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
       });
     }
 
@@ -708,7 +803,8 @@ exports.student_login = async (req, res) => {
     if (school.length === 0 || school[0].delete_status === "delete") {
       return res.json({
         success: false,
-        message: "Your school account is inactive. Please contact the administrator. ❌",
+        message:
+          "Your school account is inactive. Please contact the administrator. ❌",
       });
     }
 
@@ -729,7 +825,7 @@ exports.student_login = async (req, res) => {
         school_id: user.school_id,
         user_id: user.id,
         role: "student",
-        fcm_token: fcm_token
+        fcm_token: fcm_token,
       });
 
       if (existingToken.length === 0) {
@@ -737,7 +833,7 @@ exports.student_login = async (req, res) => {
           school_id: user.school_id,
           user_id: user.id,
           role: "student",
-          fcm_token: fcm_token
+          fcm_token: fcm_token,
         });
       }
     }
@@ -846,7 +942,6 @@ exports.add_student_subject_allot = async (req, res) => {
   }
 };
 
-//student subject alloted
 exports.student_subject_allot = async (req, res) => {
   try {
     const { school_id, session_id } = req.params;
@@ -862,7 +957,7 @@ exports.student_subject_allot = async (req, res) => {
     const rows = await getAll("students", "*", {
       school_id,
       session_id,
-
+      status: "Active",
       delete_status: "show",
     });
 
@@ -1133,14 +1228,39 @@ exports.all_student_subject_allot = async (req, res) => {
       delete_status: "show",
     });
 
-    if (!rows || rows.length === 0) {
+    // Active students fetch
+    const activeStudents = await getAll("student", "id", {
+      school_id,
+      status: "active",
+      delete_status: "show",
+    });
+
+    const activeStudentIds = activeStudents.map((student) =>
+      String(student.id),
+    );
+
+    // Sirf active students rakho
+    const filteredRows = rows.filter((item) =>
+      activeStudentIds.includes(String(item.student_id)),
+    );
+
+    if (!filteredRows || filteredRows.length === 0) {
       return res.json({
         success: true,
-        message: "No data found",
+        message: "No active student data found",
         total: 0,
         data: [],
       });
     }
+
+    // if (!rows || rows.length === 0) {
+    //   return res.json({
+    //     success: true,
+    //     message: "No data found",
+    //     total: 0,
+    //     data: [],
+    //   });
+    // }
 
     // 🔥 All subject fetch
     const subjects = await getAll("subject", "id, subject_name", {
@@ -1154,7 +1274,25 @@ exports.all_student_subject_allot = async (req, res) => {
     });
 
     // 🔥 attach subject_names as string
-    const finalData = rows.map((item) => {
+    // const finalData = rows.map((item) => {
+    //   let subjectNames = "";
+
+    //   if (item.subject_id) {
+    //     let ids = item.subject_id.split(",");
+
+    //     subjectNames = ids
+    //       .map((id) => subjectMap[id] || "")
+    //       .filter((name) => name !== "")
+    //       .join(",");
+    //   }
+
+    //   return {
+    //     ...item,
+    //     subject_names: subjectNames, // 👈 string format
+    //   };
+    // });
+
+    const finalData = filteredRows.map((item) => {
       let subjectNames = "";
 
       if (item.subject_id) {
@@ -1168,13 +1306,20 @@ exports.all_student_subject_allot = async (req, res) => {
 
       return {
         ...item,
-        subject_names: subjectNames, // 👈 string format
+        subject_names: subjectNames,
       };
     });
 
+    // return res.json({
+    //   success: true,
+    //   message: "Student subjects fetched successfully",
+    //   total: finalData.length,
+    //   data: finalData,
+    // });
+
     return res.json({
       success: true,
-      message: "Student subjects fetched successfully",
+      message: "Active student subjects fetched successfully",
       total: finalData.length,
       data: finalData,
     });
@@ -1423,6 +1568,7 @@ exports.student_fee_allot = async (req, res) => {
       school_id,
       session_id,
       registerClass: class_id,
+      status: "active",
       delete_status: "show",
     });
 
@@ -1473,19 +1619,21 @@ exports.student_fee_allot = async (req, res) => {
 
         student_fee.forEach((fee) => {
           feeamount += parseFloat(fee["amount"] || 0);
-          const head = feeHeads.find(h => Number(h.id) === Number(fee.feehead_id));
+          const head = feeHeads.find(
+            (h) => Number(h.id) === Number(fee.feehead_id),
+          );
           studentRows.push({
             feeHead: head ? head.feehead : "Unknown",
             feeFrequency: head ? head.feefrequency : "",
             frequencyDate: fee.frequency_date,
-            amount: fee.amount
+            amount: fee.amount,
           });
         });
 
         records.push({
           student_id: student_id,
           studentName: data["studentName"],
-          rows: studentRows
+          rows: studentRows,
         });
 
         if (student_fee.length > 0) {
@@ -1520,7 +1668,7 @@ exports.student_fee_allot = async (req, res) => {
         message: "No data found",
         total: 0,
         data: [],
-        records: []
+        records: [],
       });
     }
 
@@ -1529,11 +1677,14 @@ exports.student_fee_allot = async (req, res) => {
       message: "Student fees fetched successfully",
       total: rowss.length,
       data: rowss,
-      records: records
+      records: records,
     });
   } catch (error) {
     console.error(error);
-    return res.json({ success: false, message: "Server error: " + error.message });
+    return res.json({
+      success: false,
+      message: "Server error: " + error.message,
+    });
   }
 };
 
@@ -1604,7 +1755,6 @@ exports.all_student_fee_allot = async (req, res) => {
   }
 };
 
-// ================= student fee  =================
 exports.add_student_fee = async (req, res) => {
   try {
     const { student_id, school_id, session_id, fees } = req.body;
@@ -1731,11 +1881,14 @@ exports.delete_student_fee = async (req, res) => {
       school_id,
       session_id,
       student_id,
-      receiptNo
+      receiptNo,
     });
 
     if (result.affectedRows > 0) {
-      return res.json({ success: true, message: "Fee record deleted successfully" });
+      return res.json({
+        success: true,
+        message: "Fee record deleted successfully",
+      });
     }
 
     return res.json({ success: false, message: "Fee record not found" });
@@ -1760,23 +1913,32 @@ exports.student_fee = async (req, res) => {
     }
 
     let rows;
-    if (class_id) {
+
+    if (class_id && class_id !== "All") {
       const sql = `
-        SELECT s.* 
-        FROM students s
-        LEFT JOIN class_section cs ON s.registerClass = cs.id
-        WHERE s.school_id = ? AND s.session_id = ? AND s.registerClass = ? AND s.delete_status = 'show'
-        ORDER BY cs.display_order ASC, s.studentName ASC
-      `;
+    SELECT s.* 
+    FROM students s
+    LEFT JOIN class_section cs ON s.registerClass = cs.id
+    WHERE s.school_id = ?
+      AND s.session_id = ?
+      AND s.registerClass = ?
+          AND s.status = 'active'
+      AND s.delete_status = 'show'
+    ORDER BY cs.display_order ASC, s.studentName ASC
+  `;
+
       rows = await runCustomQuery(sql, [school_id, session_id, class_id]);
     } else {
       const sql = `
-        SELECT s.* 
-        FROM students s
-        LEFT JOIN class_section cs ON s.registerClass = cs.id
-        WHERE s.school_id = ? AND s.session_id = ? AND s.delete_status = 'show'
-        ORDER BY cs.display_order ASC, s.studentName ASC
-      `;
+    SELECT s.* 
+    FROM students s
+    LEFT JOIN class_section cs ON s.registerClass = cs.id
+    WHERE s.school_id = ?
+      AND s.session_id = ?
+      AND s.delete_status = 'show'
+    ORDER BY cs.display_order ASC, s.studentName ASC
+  `;
+
       rows = await runCustomQuery(sql, [school_id, session_id]);
     }
 
@@ -1932,7 +2094,7 @@ exports.student_fee = async (req, res) => {
             Balance,
             deposit,
             all_amount,
-            student_id: data["id"]
+            student_id: data["id"],
           };
         }
 
@@ -2096,12 +2258,14 @@ exports.student_class_test_details = async (req, res) => {
         session_id,
         registerClass,
         delete_status: "show",
+        status: "active",
       });
     } else {
       students = await getAll("students", "*", {
         school_id,
         session_id,
         delete_status: "show",
+        status: "active",
       });
     }
 
@@ -2118,14 +2282,17 @@ exports.student_class_test_details = async (req, res) => {
       let students_data = await Promise.all(
         students_marks.map(async (datamarks) => {
           // 🔥 Student table se student_ids aur stu_prefix fetch karein (Edit functionality ke liye)
-          const studInfo = await getAll("students", "student_ids, stu_prefix", { id: datamarks["student_id"] });
-          const student_ids = studInfo.length > 0 ? studInfo[0].student_ids : "";
+          const studInfo = await getAll("students", "student_ids, stu_prefix", {
+            id: datamarks["student_id"],
+          });
+          const student_ids =
+            studInfo.length > 0 ? studInfo[0].student_ids : "";
           const stu_prefix = studInfo.length > 0 ? studInfo[0].stu_prefix : "";
 
           let stud_object = {
             student_id: datamarks["student_id"],
             student_ids: student_ids, // Readable ID add kiya
-            stu_prefix: stu_prefix,   // Prefix add kiya
+            stu_prefix: stu_prefix, // Prefix add kiya
             school_id,
             session_id,
             test_id: datamarks["test_id"],
@@ -2475,9 +2642,10 @@ exports.add_student_main_exam = async (req, res) => {
             father_name: datamarks["father_name"],
             student_marks: datamarks["student_marks"],
             student_viva: datamarks["viva"] ?? datamarks["student_viva"] ?? 0,
-            student_practical: datamarks["practical"] ?? datamarks["student_practical"] ?? 0,
+            student_practical:
+              datamarks["practical"] ?? datamarks["student_practical"] ?? 0,
             status: "active",
-            delete_status: "show"
+            delete_status: "show",
           };
 
           return create("student_main_exam", data);
@@ -2488,7 +2656,8 @@ exports.add_student_main_exam = async (req, res) => {
             practical: practical ?? 0, // Max Practical
             student_marks: datamarks["student_marks"],
             student_viva: datamarks["viva"] ?? datamarks["student_viva"] ?? 0,
-            student_practical: datamarks["practical"] ?? datamarks["student_practical"] ?? 0,
+            student_practical:
+              datamarks["practical"] ?? datamarks["student_practical"] ?? 0,
           };
           const existingId = datamarks_st[0].id;
           return update("student_main_exam", updateData, existingId);
@@ -2519,13 +2688,7 @@ exports.add_student_main_exam = async (req, res) => {
 
 exports.student_main_exam_details = async (req, res) => {
   try {
-    const {
-      school_id,
-      session_id,
-      class_id,
-      subject_id,
-      test_id,
-    } = req.params;
+    const { school_id, session_id, class_id, subject_id, test_id } = req.params;
 
     let students;
     if (class_id != "") {
@@ -2535,12 +2698,14 @@ exports.student_main_exam_details = async (req, res) => {
         session_id,
         registerClass,
         delete_status: "show",
+        status: "active",
       });
     } else {
       students = await getAll("students", "*", {
         school_id,
         session_id,
         delete_status: "show",
+        status: "active",
       });
     }
 
@@ -2558,7 +2723,9 @@ exports.student_main_exam_details = async (req, res) => {
         students_marks.map(async (datamarks) => {
           const studentMarks = parseFloat(datamarks["student_marks"] || 0);
           const studentViva = parseFloat(datamarks["student_viva"] || 0);
-          const studentPractical = parseFloat(datamarks["student_practical"] || 0);
+          const studentPractical = parseFloat(
+            datamarks["student_practical"] || 0,
+          );
 
           const maxWritten = parseFloat(datamarks["marks"] || 0);
           const maxViva = parseFloat(datamarks["viva"] || 0);
@@ -2568,10 +2735,16 @@ exports.student_main_exam_details = async (req, res) => {
           let totalMax = maxWritten + maxViva + maxPractical;
           let parcent = totalMax > 0 ? (total / totalMax) * 100 : 0;
 
+          const student_ids =
+            datamarks.length > 0 ? datamarks[0].student_ids : "";
+          const stu_prefix = datamarks.length > 0 ? datamarks[0].stu_prefix : "";
+
           stud_object = {
             student_id: datamarks["student_id"],
             school_id,
             session_id,
+            student_ids: student_ids,
+            stu_prefix: stu_prefix,
             test_id: datamarks["test_id"],
             subject_head_id: datamarks["subject_head_id"],
             classsection_id: datamarks["classsection_id"],
@@ -2622,6 +2795,8 @@ exports.student_main_exam_details = async (req, res) => {
               student_id: stud["id"],
               student_name: stud["studentName"],
               father_name: stud["fatherName"],
+              student_ids: stud["student_ids"], // Readable ID
+              stu_prefix: stud["stu_prefix"] || "", // Prefix
               school_id,
               session_id,
               test_id: "",
@@ -2658,6 +2833,12 @@ exports.student_main_exam_details = async (req, res) => {
     return res.json({ success: false, message: "Server error" });
   }
 };
+//attendance
+
+const formatDate = (date) => {
+  if (typeof date === "string") return date.split("T")[0];
+  return new Date(date).toLocaleDateString("en-CA");
+};
 
 exports.class_attendance_list = async (req, res) => {
   try {
@@ -2682,6 +2863,19 @@ exports.class_attendance_list = async (req, res) => {
       attendance_date: date,
       delete_status: "show",
     });
+
+    const activeStudents = await getAll("students", "id", {
+      school_id,
+      session_id,
+      status: "active", // yahan apna actual status field check kar lena
+      delete_status: "show",
+    });
+
+    const activeStudentIds = activeStudents.map((s) => Number(s.id));
+
+    students_attendace = students_attendace.filter((a) =>
+      activeStudentIds.includes(Number(a.student_id)),
+    );
 
     const uniqueClassIds = [
       ...new Set(students_attendace.map((item) => item.class_id)),
@@ -2736,12 +2930,6 @@ exports.class_attendance_list = async (req, res) => {
   }
 };
 
-const formatDate = (date) => {
-
-  if (typeof date === "string") return date.split("T")[0];
-  return new Date(date).toLocaleDateString("en-CA");
-};
-
 exports.student_attendance = async (req, res) => {
   try {
     const { session_id, school_id, class_id, date, attendance_type } =
@@ -2768,12 +2956,14 @@ exports.student_attendance = async (req, res) => {
         school_id,
         session_id,
         registerClass,
+        status: "active",
         delete_status: "show",
       });
     } else {
       students = await getAll("students", "*", {
         school_id,
         session_id,
+        status: "active",
         delete_status: "show",
       });
     }
@@ -2872,7 +3062,9 @@ exports.student_attendance = async (req, res) => {
           father_name: stud.fatherName,
           class_id,
           class_name: full_class_name,
-          attendance_status: attendance ? attendance.attendance_status : "Absent", // ✅ Default to Absent if not found
+          attendance_status: attendance
+            ? attendance.attendance_status
+            : "Absent", // ✅ Default to Absent if not found
           in_status: attendance ? attendance.in_status : 0,
           out_status: attendance ? attendance.out_status : 0,
           in_time: attendance ? attendance.in_time : "00:00",
@@ -3005,25 +3197,31 @@ exports.add_student_attendance = async (req, res) => {
       };
 
       // ✅ INSERT / UPDATE
+      let shouldNotify = false;
       if (data_st.length === 0) {
         await create("student_attendance", data);
+        shouldNotify = true; // New attendance record
       } else {
-        // await update("student_attendance", data, { id: data_st[0].id });
         await update("student_attendance", data, data_st[0].id);
+        if (Number(data_st[0].in_status) !== Number(attendance_detail.in_status)) {
+          shouldNotify = true; // Status changed
+        }
       }
 
       // 🔔 NOTIFICATION
-      try {
-        const currentStatus =
-          Number(attendance_detail.in_status) === 1 ? "Present" : "Absent";
+      if (shouldNotify) {
+        try {
+          const currentStatus =
+            Number(attendance_detail.in_status) === 1 ? "Present" : "Absent";
 
-        await sendAttendanceNotification(
-          student_id,
-          formattedDate,
-          currentStatus,
-        );
-      } catch (e) {
-        console.log("Notification error:", e.message);
+          await sendAttendanceNotification(
+            student_id,
+            formattedDate,
+            currentStatus,
+          );
+        } catch (e) {
+          console.log("Notification error:", e.message);
+        }
       }
     }
 
@@ -3046,7 +3244,10 @@ exports.student_attendance_report = async (req, res) => {
     const { school_id, session_id, student_id } = req.params;
 
     // Fetch student info first to get student_ids, name, and class
-    const studentRows = await getAll("students", "*", { id: student_id, school_id });
+    const studentRows = await getAll("students", "*", {
+      id: student_id,
+      school_id,
+    });
     if (studentRows.length === 0) {
       return res.json({ success: false, message: "Student not found" });
     }
@@ -3056,39 +3257,58 @@ exports.student_attendance_report = async (req, res) => {
     let className = "-";
     if (student.registerClass) {
       // First try to find in class_section to get section name too
-      let classSec = await getAll("class_section", "*", { school_id, id: student.registerClass });
+      let classSec = await getAll("class_section", "*", {
+        school_id,
+        id: student.registerClass,
+      });
       if (classSec.length === 0) {
         // Fallback to class_id
-        classSec = await getAll("class_section", "*", { school_id, class_id: student.registerClass });
+        classSec = await getAll("class_section", "*", {
+          school_id,
+          class_id: student.registerClass,
+        });
       }
 
       if (classSec.length > 0) {
         const section = classSec[0].section || "";
-        const classMaster = await getAll("class", "*", { school_id, id: classSec[0].class_id });
+        const classMaster = await getAll("class", "*", {
+          school_id,
+          id: classSec[0].class_id,
+        });
         if (classMaster.length > 0) {
-          className = classMaster[0].class_name + (section ? " " + section : "");
+          className =
+            classMaster[0].class_name + (section ? " " + section : "");
         }
       } else {
         // Direct fallback to class table
-        const classData = await getAll("class", "*", { school_id, id: student.registerClass });
+        const classData = await getAll("class", "*", {
+          school_id,
+          id: student.registerClass,
+        });
         if (classData.length > 0) {
           className = classData[0].class_name;
         }
       }
     }
 
-    let attendances = await getAll("student_attendance", "*", { school_id, session_id, student_id });
+    let attendances = await getAll("student_attendance", "*", {
+      school_id,
+      session_id,
+      student_id,
+    });
 
     // Enrich attendance data with student info
     if (attendances && attendances.length > 0) {
-      attendances = attendances.sort((a, b) => new Date(b.attendance_date) - new Date(a.attendance_date));
+      attendances = attendances.sort(
+        (a, b) => new Date(b.attendance_date) - new Date(a.attendance_date),
+      );
 
-      attendances = attendances.map(att => ({
+      attendances = attendances.map((att) => ({
         ...att,
         student_ids: student.student_ids, // Admission Number
         studentName: student.studentName || student.student_name,
         class_name: className,
-        father_name: student.fatherName || student.father_name
+        father_name: student.fatherName || student.father_name,
       }));
     } else {
       attendances = [];
@@ -3105,31 +3325,46 @@ exports.student_fee_report = async (req, res) => {
     const { school_id, session_id, student_id } = req.params;
 
     if (!school_id || !session_id || !student_id) {
-      return res.json({ success: false, message: "Missing required parameters" });
+      return res.json({
+        success: false,
+        message: "Missing required parameters",
+      });
     }
 
     const rows = await getAll("students", "*", { id: student_id });
     const student = rows[0];
-    if (!student) return res.json({ success: false, message: "Student not found" });
+    if (!student)
+      return res.json({ success: false, message: "Student not found" });
 
     // Fetch class and session names
     const classData = await getAll("class", "*", { id: student.registerClass });
-    const sessionData = await getAll("school_session", "*", { id: student.session_id });
+    const sessionData = await getAll("school_session", "*", {
+      id: student.session_id,
+    });
     student.class_name = classData[0]?.class_name || "-";
     student.session_name = sessionData[0]?.session_name || "-";
 
     const allotments = await getAll("student_fee_allot", "*", {
-      school_id, session_id, student_id, delete_status: "show"
+      school_id,
+      session_id,
+      student_id,
+      delete_status: "show",
     });
 
     const payments = await getAll("students_submit_fee", "*", {
-      school_id, session_id, student_id, delete_status: "show"
+      school_id,
+      session_id,
+      student_id,
+      delete_status: "show",
     });
 
-    const heads = await getAll("feehead", "*", { school_id, delete_status: "show" });
+    const heads = await getAll("feehead", "*", {
+      school_id,
+      delete_status: "show",
+    });
 
     let totalAllot = 0;
-    allotments.forEach(a => totalAllot += parseFloat(a.amount || 0));
+    allotments.forEach((a) => (totalAllot += parseFloat(a.amount || 0)));
 
     let totalPaid = 0;
     if (payments && payments.length > 0) {
@@ -3143,7 +3378,7 @@ exports.student_fee_report = async (req, res) => {
 
     // Group payments by fee head
     const paidByHead = {};
-    payments.forEach(p => {
+    payments.forEach((p) => {
       const hId = p.feehead_id || p.fee_head_id;
       paidByHead[hId] = (paidByHead[hId] || 0) + parseFloat(p.fee_pay || 0);
     });
@@ -3153,17 +3388,17 @@ exports.student_fee_report = async (req, res) => {
       console.log("SAMPLE ALLOTMENT KEYS:", Object.keys(allotments[0]));
     }
 
-    const breakdown = (allotments || []).map(a => {
+    const breakdown = (allotments || []).map((a) => {
       const hId = a.feehead_id || a.fee_head_id;
       const paid = paidByHead[hId] || 0;
       const allotted = parseFloat(a.amount || 0);
-      const head = heads.find(h => String(h.id) === String(hId));
+      const head = heads.find((h) => String(h.id) === String(hId));
       return {
         headId: hId,
-        headName: head ? (head.feehead || head.fee_head_name) : `Head ${hId}`,
+        headName: head ? head.feehead || head.fee_head_name : `Head ${hId}`,
         allotted,
         paid,
-        balance: allotted - paid
+        balance: allotted - paid,
       };
     });
     console.log("FINAL STUDENT DATA:", student);
@@ -3179,8 +3414,8 @@ exports.student_fee_report = async (req, res) => {
         allotments,
         payments,
         heads,
-        breakdown
-      }
+        breakdown,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -3193,7 +3428,10 @@ exports.student_class_test_report = async (req, res) => {
     const { school_id, session_id, student_id } = req.params;
 
     if (!school_id || !session_id || !student_id) {
-      return res.json({ success: false, message: "Missing required parameters" });
+      return res.json({
+        success: false,
+        message: "Missing required parameters",
+      });
     }
 
     const sql = `
@@ -3217,11 +3455,15 @@ exports.student_class_test_report = async (req, res) => {
       ORDER BY ct.test_date DESC, sct.id DESC
     `;
 
-    const results = await db.runCustomQuery(sql, [student_id, school_id, session_id]);
+    const results = await db.runCustomQuery(sql, [
+      student_id,
+      school_id,
+      session_id,
+    ]);
 
     res.json({
       success: true,
-      data: results
+      data: results,
     });
   } catch (error) {
     console.error(error);
@@ -3234,7 +3476,10 @@ exports.student_main_exam_report = async (req, res) => {
     const { school_id, session_id, student_id } = req.params;
 
     if (!school_id || !session_id || !student_id) {
-      return res.json({ success: false, message: "Missing required parameters" });
+      return res.json({
+        success: false,
+        message: "Missing required parameters",
+      });
     }
 
     const query = `
@@ -3258,7 +3503,11 @@ exports.student_main_exam_report = async (req, res) => {
       ORDER BY me.exam_date DESC
     `;
 
-    const results = await db.runCustomQuery(query, [school_id, session_id, student_id]);
+    const results = await db.runCustomQuery(query, [
+      school_id,
+      session_id,
+      student_id,
+    ]);
 
     return res.json({
       success: true,
@@ -3276,11 +3525,17 @@ exports.student_dashboard_summary = async (req, res) => {
     const { school_id, session_id, student_id } = req.params;
 
     if (!school_id || !session_id || !student_id) {
-      return res.json({ success: false, message: "Missing required parameters" });
+      return res.json({
+        success: false,
+        message: "Missing required parameters",
+      });
     }
 
     // 1. Student Profile & Class Name
-    const studentRows = await getAll("students", "*", { id: student_id, school_id });
+    const studentRows = await getAll("students", "*", {
+      id: student_id,
+      school_id,
+    });
     if (studentRows.length === 0) {
       return res.json({ success: false, message: "Student not found" });
     }
@@ -3288,19 +3543,32 @@ exports.student_dashboard_summary = async (req, res) => {
 
     let className = "-";
     if (student.registerClass) {
-      let classSec = await getAll("class_section", "*", { school_id, id: student.registerClass });
+      let classSec = await getAll("class_section", "*", {
+        school_id,
+        id: student.registerClass,
+      });
       if (classSec.length === 0) {
-        classSec = await getAll("class_section", "*", { school_id, class_id: student.registerClass });
+        classSec = await getAll("class_section", "*", {
+          school_id,
+          class_id: student.registerClass,
+        });
       }
 
       if (classSec.length > 0) {
         const section = classSec[0].section || "";
-        const classMaster = await getAll("class", "*", { school_id, id: classSec[0].class_id });
+        const classMaster = await getAll("class", "*", {
+          school_id,
+          id: classSec[0].class_id,
+        });
         if (classMaster.length > 0) {
-          className = classMaster[0].class_name + (section ? " " + section : "");
+          className =
+            classMaster[0].class_name + (section ? " " + section : "");
         }
       } else {
-        const classData = await getAll("class", "*", { school_id, id: student.registerClass });
+        const classData = await getAll("class", "*", {
+          school_id,
+          id: student.registerClass,
+        });
         if (classData.length > 0) {
           className = classData[0].class_name;
         }
@@ -3308,20 +3576,39 @@ exports.student_dashboard_summary = async (req, res) => {
     }
 
     // 2. Attendance Summary
-    const attendances = await getAll("student_attendance", "*", { school_id, session_id, student_id });
+    const attendances = await getAll("student_attendance", "*", {
+      school_id,
+      session_id,
+      student_id,
+    });
     const totalDays = attendances.length;
-    const presentDays = attendances.filter(a => a.attendance_status === "Present").length;
-    const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : 0;
+    const presentDays = attendances.filter(
+      (a) => a.attendance_status === "Present",
+    ).length;
+    const attendancePercentage =
+      totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : 0;
 
     // 3. Fee Summary
-    const allotments = await getAll("student_fee_allot", "*", { school_id, session_id, student_id, delete_status: "show" });
-    const payments = await getAll("students_submit_fee", "*", { school_id, session_id, student_id, delete_status: "show" });
+    const allotments = await getAll("student_fee_allot", "*", {
+      school_id,
+      session_id,
+      student_id,
+      delete_status: "show",
+    });
+    const payments = await getAll("students_submit_fee", "*", {
+      school_id,
+      session_id,
+      student_id,
+      delete_status: "show",
+    });
 
     let totalAllotted = 0;
-    allotments.forEach(a => totalAllotted += parseFloat(a.amount || 0));
+    allotments.forEach((a) => (totalAllotted += parseFloat(a.amount || 0)));
 
     let totalPaid = 0;
-    payments.forEach(p => totalPaid += parseFloat(p.fee_pay || p.amount || 0));
+    payments.forEach(
+      (p) => (totalPaid += parseFloat(p.fee_pay || p.amount || 0)),
+    );
 
     // 4. Notifications (Latest 3)
     const notificationSql = `
@@ -3331,37 +3618,46 @@ exports.student_dashboard_summary = async (req, res) => {
       AND n.delete_status = 'show'
       ORDER BY n.id DESC LIMIT 3
     `;
-    const recentNotifications = await runCustomQuery(notificationSql, [school_id, session_id, student.registerClass, student_id]);
+    const recentNotifications = await runCustomQuery(notificationSql, [
+      school_id,
+      session_id,
+      student.registerClass,
+      student_id,
+    ]);
 
     // 5. Tests Summary
-    const tests = await getAll("student_class_test", "*", { school_id, session_id, student_id, delete_status: "show" });
+    const tests = await getAll("student_class_test", "*", {
+      school_id,
+      session_id,
+      student_id,
+      delete_status: "show",
+    });
 
     res.json({
       success: true,
       data: {
         profile: {
           ...student,
-          class_name: className
+          class_name: className,
         },
         stats: {
           attendance: {
             percentage: attendancePercentage,
             total: totalDays,
-            present: presentDays
+            present: presentDays,
           },
           fees: {
             total: totalAllotted,
             paid: totalPaid,
-            balance: totalAllotted - totalPaid
+            balance: totalAllotted - totalPaid,
           },
           tests: {
-            total: tests.length
+            total: tests.length,
           },
-          notifications: recentNotifications
-        }
-      }
+          notifications: recentNotifications,
+        },
+      },
     });
-
   } catch (error) {
     console.error("Summary API Error:", error);
     res.json({ success: false, message: error.message });
@@ -3374,7 +3670,10 @@ exports.class_test_section_report = async (req, res) => {
     const { from_date, to_date } = req.query;
 
     if (!school_id || !session_id || !class_id) {
-      return res.json({ success: false, message: "Missing required parameters" });
+      return res.json({
+        success: false,
+        message: "Missing required parameters",
+      });
     }
 
     // 1. Get all students of this class section
@@ -3382,11 +3681,17 @@ exports.class_test_section_report = async (req, res) => {
       school_id,
       session_id,
       registerClass: class_id,
-      delete_status: "show"
+      delete_status: "show",
     });
 
     if (students.length === 0) {
-      return res.json({ success: true, students: [], subjects: [], classTests: [], marksData: [] });
+      return res.json({
+        success: true,
+        students: [],
+        subjects: [],
+        classTests: [],
+        marksData: [],
+      });
     }
 
     // 2. Get active subjects
@@ -3409,7 +3714,7 @@ exports.class_test_section_report = async (req, res) => {
         AND delete_status = 'show'
     `;
     const testsParams = [school_id];
-    
+
     if (from_date) {
       testsSql += ` AND test_date >= ?`;
       testsParams.push(from_date);
@@ -3438,20 +3743,20 @@ exports.class_test_section_report = async (req, res) => {
 
     return res.json({
       success: true,
-      students: students.map(s => ({
+      students: students.map((s) => ({
         id: s.id,
         studentName: s.studentName,
         fatherName: s.fatherName,
         student_ids: s.student_ids,
-        stu_prefix: s.stu_prefix
+        stu_prefix: s.stu_prefix,
       })),
       subjects: subjects,
-      classTests: classTests.map(t => ({
+      classTests: classTests.map((t) => ({
         id: t.id,
         test_name: t.test_name,
-        test_date: t.test_date
+        test_date: t.test_date,
       })),
-      marksData: marksData
+      marksData: marksData,
     });
   } catch (error) {
     console.error("class_test_section_report Error:", error);
@@ -3464,7 +3769,10 @@ exports.main_exam_section_report = async (req, res) => {
     const { school_id, session_id, class_id, exam_id } = req.params;
 
     if (!school_id || !session_id || !class_id || !exam_id) {
-      return res.json({ success: false, message: "Missing required parameters" });
+      return res.json({
+        success: false,
+        message: "Missing required parameters",
+      });
     }
 
     // 1. Get all students of this class section
@@ -3472,11 +3780,16 @@ exports.main_exam_section_report = async (req, res) => {
       school_id,
       session_id,
       registerClass: class_id,
-      delete_status: "show"
+      delete_status: "show",
     });
 
     if (students.length === 0) {
-      return res.json({ success: true, students: [], subjects: [], marksData: [] });
+      return res.json({
+        success: true,
+        students: [],
+        subjects: [],
+        marksData: [],
+      });
     }
 
     // 2. Get active subjects
@@ -3508,19 +3821,24 @@ exports.main_exam_section_report = async (req, res) => {
         AND test_id = ?
         AND delete_status = 'show'
     `;
-    const marksData = await runCustomQuery(marksSql, [school_id, session_id, class_id, exam_id]);
+    const marksData = await runCustomQuery(marksSql, [
+      school_id,
+      session_id,
+      class_id,
+      exam_id,
+    ]);
 
     return res.json({
       success: true,
-      students: students.map(s => ({
+      students: students.map((s) => ({
         id: s.id,
         studentName: s.studentName,
         fatherName: s.fatherName,
         student_ids: s.student_ids,
-        stu_prefix: s.stu_prefix
+        stu_prefix: s.stu_prefix,
       })),
       subjects: subjects,
-      marksData: marksData
+      marksData: marksData,
     });
   } catch (error) {
     console.error("main_exam_section_report Error:", error);
@@ -3530,9 +3848,22 @@ exports.main_exam_section_report = async (req, res) => {
 
 exports.promote_students = async (req, res) => {
   try {
-    const { school_id, current_session_id, target_session_id, target_class_id, student_ids } = req.body;
+    const {
+      school_id,
+      current_session_id,
+      target_session_id,
+      target_class_id,
+      student_ids,
+    } = req.body;
 
-    if (!school_id || !current_session_id || !target_session_id || !target_class_id || !student_ids || !Array.isArray(student_ids)) {
+    if (
+      !school_id ||
+      !current_session_id ||
+      !target_session_id ||
+      !target_class_id ||
+      !student_ids ||
+      !Array.isArray(student_ids)
+    ) {
       return res.json({
         success: false,
         message: "Missing required fields or student_ids is not an array ❌",
@@ -3545,9 +3876,18 @@ exports.promote_students = async (req, res) => {
     for (let currentStudentId of student_ids) {
       try {
         // 1. Fetch student details from current record
-        const studentRows = await getAll("students", "*", { id: currentStudentId, school_id, session_id: current_session_id });
+        const studentRows = await getAll("students", "*", {
+          id: currentStudentId,
+          school_id,
+          session_id: current_session_id,
+          status: "active",
+          delete_status: "show"
+        });
+        console.log("studentRows =>", studentRows);
         if (studentRows.length === 0) {
-          errors.push(`Student ID ${currentStudentId} not found in current session`);
+          errors.push(
+            `Student ID ${currentStudentId} not found in current session`,
+          );
           continue;
         }
 
@@ -3558,16 +3898,21 @@ exports.promote_students = async (req, res) => {
           student_ids: student.student_ids,
           session_id: target_session_id,
           school_id,
-          delete_status: "show"
+          status: "active",
+          delete_status: "show",
         });
 
         if (existingRows.length > 0) {
           // If already exists, update their class section and status
           const targetId = existingRows[0].id;
-          await update("students", {
-            registerClass: target_class_id,
-            status: "active"
-          }, targetId);
+          await update(
+            "students",
+            {
+              registerClass: target_class_id,
+              status: "active",
+            },
+            targetId,
+          );
           promotedCount++;
         } else {
           // If doesn't exist, create a new record for the new session
@@ -3575,9 +3920,9 @@ exports.promote_students = async (req, res) => {
             ...student,
             session_id: target_session_id,
             registerClass: target_class_id,
-            status: "active"
+            status: "active",
           };
-          
+
           // delete system/auto columns
           delete newStudentData.id;
           delete newStudentData.createdAt;
@@ -3587,7 +3932,9 @@ exports.promote_students = async (req, res) => {
           promotedCount++;
         }
       } catch (err) {
-        errors.push(`Error promoting student ID ${currentStudentId}: ${err.message}`);
+        errors.push(
+          `Error promoting student ID ${currentStudentId}: ${err.message}`,
+        );
       }
     }
 
@@ -3595,9 +3942,8 @@ exports.promote_students = async (req, res) => {
       success: true,
       message: `Promotion completed successfully ✅`,
       promoted: promotedCount,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     });
-
   } catch (error) {
     console.error("promote_students Error:", error);
     return res.json({ success: false, message: error.message });
@@ -3655,6 +4001,7 @@ exports.previous_due_fees = async (req, res) => {
         GROUP BY student_id, session_id
       ) submit ON s.id = submit.student_id AND s.session_id = submit.session_id
       WHERE s.school_id = ? 
+        AND s.status = 'active'
         AND s.session_id != (
           SELECT id FROM school_session 
           WHERE school_id = ? AND delete_status = 'show' 
@@ -3676,6 +4023,3 @@ exports.previous_due_fees = async (req, res) => {
     return res.json({ success: false, message: error.message });
   }
 };
-
-
-

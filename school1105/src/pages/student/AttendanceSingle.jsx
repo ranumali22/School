@@ -442,36 +442,26 @@ const AttendanceSingle = () => {
     const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : 0;
 
     return (
-        <div className="p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans pb-32 md:pb-12 overflow-x-hidden">
-            <style>{`
-                @media (max-width: 768px) {
-                    .main-content, .page-content {
-                        overflow: visible !important;
-                    }
-                    body {
-                        overflow-y: auto !important;
-                        height: auto !important;
-                    }
-                }
-            `}</style>
+        <div className=" min-h-screen font-sans  overflow-x-hidden">
+          
             {/* Header section */}
-            <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="mb-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-xl font-bold ">Attendance Report</h2>
                     <p className="text-gray-500 text-sm mt-1">View and manage your attendance history.</p>
                 </div>
-                <div className="bg-white px-5 py-3 rounded-2xl border border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] w-full md:w-auto">
+                {/* <div className="bg-white px-5 py-3 rounded-2xl border border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] w-full md:w-auto">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Student</p>
                     <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></div>
                         <p className="text-sm font-bold text-gray-900">{studentName}</p>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
-                <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-5">
+                <div className="bg-white p-4 md:p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
                     <div className="bg-blue-600 h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100 shrink-0">
                         <FaCalendarAlt className="text-lg md:text-2xl" />
                     </div>
@@ -481,7 +471,7 @@ const AttendanceSingle = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
+                <div className="bg-white p-4 md:p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
                     <div className="bg-emerald-600 h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-100 shrink-0">
                         <FaGraduationCap className="text-lg md:text-2xl" />
                     </div>
@@ -491,7 +481,7 @@ const AttendanceSingle = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
+                <div className="bg-white p-4 md:p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
                     <div className="bg-rose-600 h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-100 shrink-0">
                         <FaFilePdf className="text-lg md:text-2xl" />
                     </div>
@@ -501,7 +491,7 @@ const AttendanceSingle = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
+                <div className="bg-white p-4 md:p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-5 hover:shadow-md transition-all">
                     <div className="bg-indigo-600 h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100 shrink-0">
                         <FaChartLine className="text-lg md:text-2xl" />
                     </div>
@@ -513,7 +503,7 @@ const AttendanceSingle = () => {
             </div>
 
             {/* Filters Container */}
-            <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-50 mb-8">
+            <div className="bg-white p-5 md:p-6 rounded-lg shadow-sm border border-gray-50 mb-8">
                 <div className="flex flex-col md:flex-row items-center gap-4">
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         <div className="flex-1 md:w-48">
@@ -636,7 +626,7 @@ const AttendanceSingle = () => {
                         currentItems.map((s, i) => {
                             const isPresent = getStatus(s) === "Present";
                             return (
-                                <div key={s.id || i} className={`bg-white p-5 rounded-3xl shadow-sm border-l-4 transition-all ${isPresent ? "border-l-emerald-500" : "border-l-rose-500"} border-t border-r border-b border-gray-100`}>
+                                <div key={s.id || i} className={`bg-white p-2 rounded-lg shadow-sm border-l-4 transition-all ${isPresent ? "border-l-emerald-500" : "border-l-rose-500"} border-t border-r border-b border-gray-100`}>
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-4">
                                             <div className="h-12 w-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 font-bold text-sm border border-gray-100">

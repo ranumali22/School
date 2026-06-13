@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import StudentSidebar from "./StudentSidebar";
 import StudentTopbar from "./StudentTopbar";
+import StudentBottomBar from "./StudentBottomBar";
 import { registerPushNotifications } from "../../utils/pushNotifications";
 
 const StudentLayout = ({ children }) => {
@@ -30,6 +31,8 @@ const StudentLayout = ({ children }) => {
           {children}
         </div>
       </div>
+
+      <StudentBottomBar />
     </div>
   );
 };

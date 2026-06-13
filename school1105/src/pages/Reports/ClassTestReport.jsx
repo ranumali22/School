@@ -25,19 +25,17 @@ const ClassTestReport = () => {
 
   const school_id = localStorage.getItem("school_id");
 
-  // Robust session ID check with fallback to session_data
   const getSessionId = () => {
     const sId = localStorage.getItem("session_id");
     if (sId && sId !== "undefined" && sId !== "null") return sId;
     try {
       const sData = JSON.parse(localStorage.getItem("session_data") || "{}");
       if (sData && sData.id) return String(sData.id);
-    } catch (e) {}
+    } catch (e) { }
     return "";
   };
   const session_id = getSessionId();
 
-  // Helper to add or subtract days from a date string
   const getOffsetDate = (dateStr, days) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -69,20 +67,45 @@ const ClassTestReport = () => {
       .catch(console.error);
   };
 
+  // const fetchClassTests = () => {
+  //   fetch(`${localurl}class_test/${school_id}/${session_id}`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       if (data.success && data.row) {
+
+  //         const activeTests = data.row.filter((t) => t.status === "Active");
+
+  //         const formattedTests = activeTests.map((t) => ({
+  //           ...t,
+  //           test_name: t.test_name
+  //             ? t.test_name.charAt(0).toUpperCase() + t.test_name.slice(1)
+  //             : "Test",
+  //         }));
+  //         setAllTestsList(formattedTests);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error fetching all class tests:", err);
+  //     });
+  // };
+
+
   const fetchClassTests = () => {
     fetch(`${localurl}class_test/${school_id}/${session_id}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.row) {
-          // Filter to only include active class tests
-          const activeTests = data.row.filter((t) => t.status === "Active");
-          // Normalize test names to Title Case for dropdown (e.g. '1st test' -> '1st Test')
-          const formattedTests = activeTests.map((t) => ({
-            ...t,
-            test_name: t.test_name
-              ? t.test_name.charAt(0).toUpperCase() + t.test_name.slice(1)
-              : "Test",
-          }));
+        if (data.success && Array.isArray(data.row)) {
+
+          const formattedTests = data.row
+            .filter((t) => t.status === "Active")
+            .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+            .map((t) => ({
+              ...t,
+              test_name: t.test_name
+                ? t.test_name.charAt(0).toUpperCase() + t.test_name.slice(1)
+                : "Test",
+            }));
+
           setAllTestsList(formattedTests);
         }
       })
@@ -371,7 +394,7 @@ const ClassTestReport = () => {
               );
               currentY += logoHeight + 9;
             }
-          } catch (e) {}
+          } catch (e) { }
         }
       }
 
@@ -587,18 +610,18 @@ const ClassTestReport = () => {
           // Draw diagonal line and labels in the first header cell to match UI
           if (data.section === "head" && data.column.index === 0 && data.row.index === 0) {
             const { x, y, width, height } = data.cell;
-            
+
             // Draw diagonal line
             data.doc.setDrawColor(255, 255, 255);
             data.doc.setLineWidth(0.35);
             data.doc.line(x, y, x + width, y + height);
-            
+
             // Draw SUB (Top Right)
             data.doc.setFont("helvetica", "bold");
             data.doc.setFontSize(7.5);
             data.doc.setTextColor(219, 234, 254); // text-blue-100
             data.doc.text("SUB", x + width - 3, y + 4.5, { align: "right" });
-            
+
             // Draw STU (Bottom Left)
             data.doc.text("STU", x + 3, y + height - 3.5, { align: "left" });
           }

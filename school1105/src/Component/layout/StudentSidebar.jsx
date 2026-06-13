@@ -13,7 +13,7 @@ import {
 
 /* ================= MENU DATA ================= */
 
-const menuData = [
+export const studentMenuData = [
   {
     title: "Dashboard",
     icon: "dashboard",
@@ -58,7 +58,7 @@ const menuData = [
 
 /* ================= ICON MAP ================= */
 
-const iconMap = {
+export const studentIconMap = {
   dashboard: <LayoutDashboard size={20} />,
   students: <Users size={20} />,
   teachers: <GraduationCap size={20} />,
@@ -77,7 +77,7 @@ const StudentSidebar = ({ mobileOpen, setMobileOpen }) => {
 
   /* ===== Auto open correct submenu ===== */
   useEffect(() => {
-    menuData.forEach((menu) => {
+    studentMenuData.forEach((menu) => {
       if (menu.submenu) {
         const match = menu.submenu.find(
           (sub) => sub.path === location.pathname,
@@ -99,11 +99,16 @@ const StudentSidebar = ({ mobileOpen, setMobileOpen }) => {
         ></div>
       )}
 
-      <div
+      {/* <div
         className={`sidebar 
           ${collapsed && !mobileOpen ? "collapsed" : ""} 
           ${mobileOpen ? "mobile-open" : ""}`}
-      >
+      > */}
+        <div
+          className={`sidebar shrink-0
+          ${collapsed ? "collapsed" : ""} 
+           ${mobileOpen ? "mobile-open" : ""}`}
+        >
         {/* Header */}
         <div className="sidebar-header">
           {(!collapsed || mobileOpen) && <h2>Student Dashboard</h2>}
@@ -116,7 +121,7 @@ const StudentSidebar = ({ mobileOpen, setMobileOpen }) => {
 
         {/* Menu */}
         <ul className="menu">
-          {menuData.map((menu, index) => (
+          {studentMenuData.map((menu, index) => (
             <li key={index}>
               {menu.submenu ? (
                 <>
@@ -127,7 +132,7 @@ const StudentSidebar = ({ mobileOpen, setMobileOpen }) => {
                     }
                   >
                     <div className="menu-left">
-                      {iconMap[menu.icon]}
+                      {studentIconMap[menu.icon]}
                       {(!collapsed || mobileOpen) && <span>{menu.title}</span>}
                     </div>
 
@@ -170,7 +175,7 @@ const StudentSidebar = ({ mobileOpen, setMobileOpen }) => {
                   }
                 >
                   <div className="menu-left">
-                    {iconMap[menu.icon]}
+                    {studentIconMap[menu.icon]}
                     {(!collapsed || mobileOpen) && <span>{menu.title}</span>}
                   </div>
                 </NavLink>

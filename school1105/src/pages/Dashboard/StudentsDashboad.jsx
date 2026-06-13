@@ -50,7 +50,7 @@ const BannerCarousel = () => {
   if (banners.length === 0) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] h-56 md:h-64 bg-gray-100 shadow-sm border border-gray-50 group">
+    <div className="relative overflow-hidden  h-56 md:h-64 bg-gray-100 shadow-sm border border-gray-50 group">
       {banners.map((banner, i) => (
         <div
           key={i}
@@ -240,7 +240,7 @@ const StudentsDashboad = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7fe] p-4 md:p-8 pb-32 md:pb-12 font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#f4f7fe]  font-sans overflow-x-hidden">
       <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
         {/* 🔷 HEADER SECTION */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-2 border-b border-gray-100">

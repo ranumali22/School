@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { localurl } from "../../api/api";
 import { handleApiResponse, showError } from "../../Component/common/alert";
 import { FloatingInput, FloatingSelect, FloatingSelects } from "../../Component/common/FloatingInput";
+import usePagination from "../../hooks/usePagination";
+import CommonPagination from "../../Component/common/Pagination";
 
 const StaffPeriodAllot = () => {
   const navigate = useNavigate();
@@ -20,6 +22,16 @@ const StaffPeriodAllot = () => {
   const [edit_id, setedit_id] = useState("");
   const [ButtonAction, setButtonAction] = useState("");
   const [errors, setErrors] = useState({});
+
+  // Pagination hook
+  const {
+    currentPage,
+    totalPages,
+    currentData: paginatedAllotments,
+    setCurrentPage,
+    itemsPerPage,
+    changeItemsPerPage,
+  } = usePagination(allotments, 10);
 
   const [formData, setFormData] = useState({
     staff_id: "",
@@ -43,22 +55,36 @@ const StaffPeriodAllot = () => {
   }, []);
 
   const getMasters = (sid, sess_id) => {
+    // fetch(localurl + "employee/" + sid + "/" + sess_id)
+    //   .then(res => res.json())
+    //   .then(data => {
+    //     if (data.row) {
+    //       setEmployees(data.row
+    //         .sort((a, b) => String(a.employeeFullName).localeCompare(String(b.employeeFullName))));
+    //     }
+
     // Employees
     fetch(localurl + "employee/" + sid + "/" + sess_id)
       .then(res => res.json())
       .then(data => {
         if (data.row) {
-          // Sorting employees alphabetically
-          setEmployees(data.row.sort((a, b) => String(a.employeeFullName).localeCompare(String(b.employeeFullName))));
+          // Filtering active employees and sorting alphabetically
+          const activeEmployees = data.row.filter(emp => emp.status && emp.status.toLowerCase() === "active");
+          setEmployees(activeEmployees.sort((a, b) => String(a.employeeFullName).localeCompare(String(b.employeeFullName))));
         }
+
       });
+
 
     // Classes
     fetch(localurl + "class_section/" + sid)
       .then(res => res.json())
       .then(data => {
         if (data.row) {
-          setClasses(data.row);
+
+          setClasses(data.row
+            .filter((item) => item.status === "Active")
+            .sort((a, b) => (a.display_order || 0) - (b.display_order || 0)) || []);
         }
       });
 
@@ -67,7 +93,9 @@ const StaffPeriodAllot = () => {
       .then(res => res.json())
       .then(data => {
         if (data.row) {
-          setPeriods(data.row.sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
+          setPeriods(data.row
+            .filter((item) => item.status === "Active")
+            .sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
         }
       });
 
@@ -75,7 +103,10 @@ const StaffPeriodAllot = () => {
     fetch(localurl + "subject/" + sid)
       .then(res => res.json())
       .then(data => {
-        let sList = data.rows || data.row || [];
+        let sList = (data.rows || data.row || [])
+          .filter((item) => item.status === "Active")
+          .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+
         setSubjects(sList);
       });
   };
@@ -235,6 +266,7 @@ const StaffPeriodAllot = () => {
 
   // Helper functions for table display
   const getStaffName = (id) => employees.find(e => e.id == id)?.employeeFullName || id;
+
   const getClassName = (id) => {
     const c = classes.find(c => c.id == id);
     return c ? `${c.class_name} ${c.section}` : id;
@@ -557,10 +589,10 @@ const StaffPeriodAllot = () => {
           </thead>
 
           <tbody>
-            {allotments.length > 0 ? (
-              allotments.map((item, index) => (
+            {paginatedAllotments.length > 0 ? (
+              paginatedAllotments.map((item, index) => (
                 <tr key={index} className="text-center border-t">
-                  <td>{index + 1}</td>
+                  <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td>{getStaffName(item.staff_id)}</td>
                   <td>{getClassName(item.class_id)}</td>
                   <td>{item.room_no || "-"}</td>
@@ -585,6 +617,15 @@ const StaffPeriodAllot = () => {
             )}
           </tbody>
         </table>
+
+        <CommonPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={allotments.length}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={changeItemsPerPage}
+        />
       </div>
 
       {/* MODAL */}
@@ -604,9 +645,11 @@ const StaffPeriodAllot = () => {
                   value={formData.staff_id}
                   onChange={handleChange}
                   required
-                  options={employees.map(e => ({ value: e.id, label: `${e.employeeFullName} (${e.loginId})` }))}
+                  options={
+                    employees.map(e => ({ value: e.id, label: `${e.employeeFullName}` }))}
                   error={errors.staff_id}
                 />
+
               </div>
 
               <div className="col-span-1">

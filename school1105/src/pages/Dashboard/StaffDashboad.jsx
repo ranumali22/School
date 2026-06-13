@@ -194,18 +194,18 @@ const StaffDashboad = () => {
   const stats = summary?.stats || {};
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 pb-32 md:pb-12 font-sans selection:bg-blue-100 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+    <div className="min-h-screen   overflow-x-hidden">
+      <div className="max-w-7xl mx-auto  animate-in fade-in duration-500">
 
         {/* SIMPLE SOLID HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-200 pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-200 mb-4 ">
           <div>
             <h1 className="text-xl md:text-4xl font-bold text-gray-900 tracking-tight flex items-center gap-x-3">
               {getGreeting()},
               <span className="text-[#0860C4] capitalize">{profile.employeeFullName?.toLowerCase() || authData.employeeFullName?.toLowerCase() || "Faculty"}</span>
               <span className="inline-block animate-bounce origin-bottom">👋</span>
             </h1>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-2 mb-2">
               <span className="px-2 py-0.5 bg-blue-100 text-[#0860C4] text-[10px] font-bold rounded tracking-wide">
                 {profile.designation || "Staff Member"}
               </span>
@@ -221,14 +221,14 @@ const StaffDashboad = () => {
         <BannerCarousel />
 
         {/* SOLID STATS GRID */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {[
             { title: "Classes Today", val: mySchedule.length, icon: <Calendar size={22} />, color: "blue" },
             { title: "Notices", val: stats.notifications?.length || 0, icon: <Bell size={22} />, color: "rose" },
             { title: "Total Classes", val: stats.totalClasses || 0, icon: <Users size={22} />, color: "emerald" },
             { title: "Total Periods", val: stats.totalPeriods || 0, icon: <Clock size={22} />, color: "indigo" },
           ].map((item, i) => (
-            <div key={i} className="bg-white rounded-2xl p-5 md:p-6 border border-gray-200 shadow-sm hover:border-blue-300 transition-all group">
+            <div key={i} className="bg-white rounded-lg p-5 md:p-6 mb-4 border border-gray-200 shadow-sm hover:border-blue-300 transition-all group">
               <div className="flex items-center gap-4">
                 <div className={`h-12 w-12 shrink-0 rounded-xl flex items-center justify-center border-2 
                   ${item.color === 'blue' ? 'border-blue-50 bg-blue-50 text-blue-600' :
@@ -249,15 +249,12 @@ const StaffDashboad = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* MAIN SCHEDULE (LEFT) */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 shadow-sm">
-              <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+            <div className="bg-white rounded-lg p-4 md:p-8 border border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-gray-900 rounded-xl flex items-center justify-center text-white">
-                    <Clock size={20} />
-                  </div>
+                 
                   <div>
-                    <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Today's Schedule</h2>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Faculty Workload Overview</p>
+                    <h4 className="font-black text-gray-900 uppercase tracking-tight">Today's Schedule</h4>
                   </div>
                 </div>
                 <button onClick={() => navigate("/timetable")} className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 text-[10px] font-black uppercase rounded-lg border border-gray-200 transition-all flex items-center gap-2">
@@ -285,7 +282,7 @@ const StaffDashboad = () => {
                   </div>
                 </div>
               ) : (
-                <div className="mb-8 p-8 bg-gray-50 rounded-2xl border border-dashed border-gray-300 flex items-center justify-center text-center">
+                <div className="mb-5 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-center">
                   <div>
                     <h4 className="text-xl font-bold text-gray-400 tracking-tight mb-1">
                       {nextUpcoming ? `Next Up: ${getSubjectName(nextUpcoming.allotment.subject_id)}` : 'No Classes Scheduled'}
@@ -299,7 +296,7 @@ const StaffDashboad = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {mySchedule.map((item, idx) => (
-                  <div key={idx} className={`p-5 rounded-2xl border transition-all ${item.status === 'ongoing' ? 'bg-blue-50 border-blue-300' :
+                  <div key={idx} className={`p-5 rounded-lg border transition-all ${item.status === 'ongoing' ? 'bg-blue-50 border-blue-300' :
                     item.status === 'completed' ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-gray-100'
                     }`}>
                     <div className="flex items-center justify-between">
@@ -323,10 +320,10 @@ const StaffDashboad = () => {
           </div>
 
           {/* SIDEBAR (RIGHT) */}
-          <div className="space-y-6">
+          <div className="">
             {/* SOLID NOTICE BOARD */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-200 shadow-sm">
-              <div className="flex items-center justify-between mb-6 border-b border-gray-50 pb-4">
+            <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm mb-4">
+              <div className="flex items-center justify-between mb-2 border-b border-gray-50 pb-4">
                 <h3 className="text-base font-black text-gray-900 flex items-center gap-2 uppercase tracking-tighter">
                   <Bell size={18} className="text-[#0860C4]" />
                   Latest Notices
@@ -363,7 +360,7 @@ const StaffDashboad = () => {
                 <button
                   key={i}
                   onClick={() => navigate(action.path)}
-                  className="flex items-center gap-4 p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#0860C4] hover:shadow-md transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 bg-white hover:border-[#0860C4] hover:shadow-md transition-all group"
                 >
                   <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-all ${action.color === 'blue' ? 'bg-blue-50 text-[#0860C4]' : 'bg-gray-50 text-gray-600 group-hover:bg-blue-50 group-hover:text-[#0860C4]'}`}>
                     {action.icon}
@@ -377,15 +374,7 @@ const StaffDashboad = () => {
         </div>
       </div>
 
-      <style>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in {
-          animation: fade-in 0.5s ease-out forwards;
-        }
-      `}</style>
+     
     </div>
   );
 };

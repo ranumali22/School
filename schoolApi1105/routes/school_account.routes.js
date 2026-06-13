@@ -1,11 +1,13 @@
 const express = require("express");
 const upload = require("../middleware/upload");
 const controller = require("../controllers/school_account.controller");
+const superadminControler = require("../controllers/admin.controller");
 const mastercontroller = require("../controllers/school_master.controller");
 const studentcontroller = require("../controllers/school_students.controller");
 const employeecontroller = require("../controllers/school_employee.controller");
 const homeworkcontroller = require("../controllers/school_homework.controller");
 const { getAll } = require("../model/school_account");
+const multer = require("multer");
 
 const router = express.Router();
 
@@ -29,21 +31,28 @@ router.use(async (req, res, next) => {
       "/login_school",
       "/student_login",
       "/login_employee",
-      "/check_school_status"
-    ].some(route => path.includes(route));
+      "/check_school_status",
+    ].some((route) => path.includes(route));
 
     if (isExcluded) {
       return next();
     }
 
-    const school_id = req.params.school_id || req.body.school_id || req.query.school_id;
+    const school_id =
+      req.params?.school_id || req.body?.school_id || req.query?.school_id;
     if (school_id) {
-      const schools = await getAll("school_account", "delete_status", { id: school_id });
-      if (schools && schools.length > 0 && schools[0].delete_status === "delete") {
+      const schools = await getAll("school_account", "delete_status", {
+        id: school_id,
+      });
+      if (
+        schools &&
+        schools.length > 0 &&
+        schools[0].delete_status === "delete"
+      ) {
         return res.status(403).json({
           success: false,
           is_inactive: true,
-          message: "School is inactive"
+          message: "School is inactive",
         });
       }
     }
@@ -54,12 +63,16 @@ router.use(async (req, res, next) => {
   }
 });
 
+router.post("/super_admin_login", superadminControler.superadminLogin);
+
 // school
 router.post("/register_school", upload.single("upload_logo"), controller.register_school);
+
 router.get("/all_school", controller.all_school);
 router.post("/login_school", controller.login_school);
 router.delete("/delete_school/:id", controller.delete_school);
 router.put("/update_school/:id", upload.single("upload_logo"), controller.update_school);
+
 router.get("/profile_school/:id", controller.profile_school);
 router.put("/change_password_school/:id", controller.change_password_school);
 router.post("/forget_password_school", controller.forget_password_school);
@@ -257,9 +270,17 @@ router.put("/status_notification/:id", mastercontroller.status_notification);
 router.delete("/delete_notification/:id", mastercontroller.delete_notification);
 
 //banner
-router.post("/add_banner", upload.single("banner_image"), mastercontroller.add_banner);
+router.post(
+  "/add_banner",
+  upload.single("banner_image"),
+  mastercontroller.add_banner,
+);
 router.get("/banners/:school_id", mastercontroller.get_banners);
-router.put("/update_banner/:id", upload.single("banner_image"), mastercontroller.update_banner);
+router.put(
+  "/update_banner/:id",
+  upload.single("banner_image"),
+  mastercontroller.update_banner,
+);
 router.put("/status_banner/:id", mastercontroller.status_banner);
 router.delete("/delete_banner/:id", mastercontroller.delete_banner);
 
@@ -271,8 +292,10 @@ router.delete("/delete_period/:id", mastercontroller.delete_period);
 router.put("/status_period/:id", mastercontroller.status_period);
 //exam_timetable
 router.post("/add_exam_timetable", mastercontroller.add_exam_timetable);
-router.get("/exam_timetable/:school_id/:session_id/:class_id/:exam_id", mastercontroller.get_exam_timetable);
-
+router.get(
+  "/exam_timetable/:school_id/:session_id/:class_id/:exam_id",
+  mastercontroller.get_exam_timetable,
+);
 
 //students
 router.post(
@@ -301,7 +324,10 @@ router.delete("/delete_students/:id", studentcontroller.delete_students);
 router.put("/status_student/:id", studentcontroller.status_students);
 router.post("/student_login", studentcontroller.student_login);
 router.post("/promote_students", studentcontroller.promote_students);
-router.get("/previous_due_fees/:school_id/:current_session_id", studentcontroller.previous_due_fees);
+router.get(
+  "/previous_due_fees/:school_id/:current_session_id",
+  studentcontroller.previous_due_fees,
+);
 
 //student_subject_allot
 router.post(
@@ -342,12 +368,30 @@ router.put("/status_employee/:id", employeecontroller.status_employee);
 router.post("/login_employee", employeecontroller.login_employee);
 
 //staff_period_allot
-router.post("/add_staff_period_allot", employeecontroller.add_staff_period_allot);
-router.get("/staff_period_allot/:school_id/:session_id", employeecontroller.staff_period_allot);
-router.put("/update_staff_period_allot/:id", employeecontroller.update_staff_period_allot);
-router.delete("/delete_staff_period_allot/:id", employeecontroller.delete_staff_period_allot);
-router.put("/status_staff_period_allot/:id", employeecontroller.status_staff_period_allot);
-router.get("/student_timetable/:school_id/:session_id/:class_id", employeecontroller.get_student_timetable);
+router.post(
+  "/add_staff_period_allot",
+  employeecontroller.add_staff_period_allot,
+);
+router.get(
+  "/staff_period_allot/:school_id/:session_id",
+  employeecontroller.staff_period_allot,
+);
+router.put(
+  "/update_staff_period_allot/:id",
+  employeecontroller.update_staff_period_allot,
+);
+router.delete(
+  "/delete_staff_period_allot/:id",
+  employeecontroller.delete_staff_period_allot,
+);
+router.put(
+  "/status_staff_period_allot/:id",
+  employeecontroller.status_staff_period_allot,
+);
+router.get(
+  "/student_timetable/:school_id/:session_id/:class_id",
+  employeecontroller.get_student_timetable,
+);
 
 //student_fee_allot
 router.get(
@@ -370,7 +414,10 @@ router.get(
   studentcontroller.student_fee,
 );
 router.post("/add_student_fee", studentcontroller.add_student_fee);
-router.delete("/delete_student_fee/:school_id/:session_id/:student_id/:receiptNo", studentcontroller.delete_student_fee);
+router.delete(
+  "/delete_student_fee/:school_id/:session_id/:student_id/:receiptNo",
+  studentcontroller.delete_student_fee,
+);
 router.post("/save_fcm_token", controller.save_fcm_token);
 
 //studentclass test
@@ -405,17 +452,21 @@ router.get(
   studentcontroller.student_attendance,
 );
 router.get(
-  "/class_attendance_list/:school_id/:session_id/:date/",
+  "/class_attendance_list/:school_id/:session_id/:date",
   studentcontroller.class_attendance_list,
 );
+
 router.post(
   "/add_student_attendance",
   studentcontroller.add_student_attendance,
 );
+
 router.get(
   "/student_attendance_report/:school_id/:session_id/:student_id",
   studentcontroller.student_attendance_report,
 );
+
+//fee
 router.get(
   "/student_fee_report/:school_id/:session_id/:student_id",
   studentcontroller.student_fee_report,
@@ -443,35 +494,60 @@ router.get(
 
 // Debug logging for new routes
 console.log("Checking dashboard summary handlers...");
-console.log("Student Summary Handler:", typeof studentcontroller.student_dashboard_summary);
-console.log("Staff Summary Handler:", typeof employeecontroller.staff_dashboard_summary);
+console.log(
+  "Student Summary Handler:",
+  typeof studentcontroller.student_dashboard_summary,
+);
+console.log(
+  "Staff Summary Handler:",
+  typeof employeecontroller.staff_dashboard_summary,
+);
 
 if (typeof studentcontroller.student_dashboard_summary === "function") {
   router.get(
     "/student_dashboard_summary/:school_id/:session_id/:student_id",
-    studentcontroller.student_dashboard_summary
+    studentcontroller.student_dashboard_summary,
   );
 } else {
-  console.error("CRITICAL: studentcontroller.student_dashboard_summary is not a function!");
+  console.error(
+    "CRITICAL: studentcontroller.student_dashboard_summary is not a function!",
+  );
 }
 
 if (typeof employeecontroller.staff_dashboard_summary === "function") {
   router.get(
     "/staff_dashboard_summary/:school_id/:session_id/:staff_id",
-    employeecontroller.staff_dashboard_summary
+    employeecontroller.staff_dashboard_summary,
   );
 } else {
-  console.error("CRITICAL: employeecontroller.staff_dashboard_summary is not a function!");
+  console.error(
+    "CRITICAL: employeecontroller.staff_dashboard_summary is not a function!",
+  );
 }
 
-
 // Homework / Work Upload
-router.post("/upload_work", upload.single("file"), homeworkcontroller.upload_work);
-router.post("/update_work/:id", upload.single("file"), homeworkcontroller.update_work);
-router.get("/get_staff_work/:school_id/:session_id/:staff_id", homeworkcontroller.get_staff_work);
-router.get("/get_student_work/:school_id/:session_id/:class_id", homeworkcontroller.get_student_work);
-router.get("/get_class_sections/:school_id", homeworkcontroller.get_class_sections);
+router.post(
+  "/upload_work",
+  upload.single("file"),
+  homeworkcontroller.upload_work,
+);
+router.post(
+  "/update_work/:id",
+  upload.single("file"),
+  homeworkcontroller.update_work,
+);
+router.get(
+  "/get_staff_work/:school_id/:session_id/:staff_id",
+  homeworkcontroller.get_staff_work,
+);
+router.get(
+  "/get_student_work/:school_id/:session_id/:class_id",
+  homeworkcontroller.get_student_work,
+);
+router.get(
+  "/get_class_sections/:school_id",
+  homeworkcontroller.get_class_sections,
+);
 router.put("/delete_work/:id", homeworkcontroller.delete_work);
 
 module.exports = router;
-

@@ -33,6 +33,31 @@ import {
   handleApiResponse,
 } from "../../Component/common/alert";
 
+const getStoredSchool = () => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("school") || localStorage.getItem("authData") || "{}",
+    );
+  } catch {
+    return {};
+  }
+};
+
+const getUploadUrl = (path, folder = "") => {
+  if (!path) return "";
+  const value = String(path);
+  if (value.startsWith("data:") || value.startsWith("http") || value.startsWith("blob:")) {
+    return value;
+  }
+
+  const cleanPath = value.replace(/^\/+/, "");
+  if (cleanPath.startsWith("uploads/")) {
+    return `${imageBase}${cleanPath}`;
+  }
+
+  return `${imageBase}uploads/${folder}${cleanPath}`;
+};
+
 function StudentList() {
   // Initial states for filters
   const navigate = useNavigate();
@@ -168,7 +193,7 @@ function StudentList() {
     setCurrentPage,
     itemsPerPage,
     changeItemsPerPage,
-  } = usePagination(searchStudents);
+  } = usePagination(searchStudents, 100);
 
   const [active, setActive] = useState({});
 
@@ -303,7 +328,8 @@ function StudentList() {
     const buttons = input.querySelectorAll("button");
     buttons.forEach((btn) => (btn.style.display = "none"));
 
-    const school = JSON.parse(localStorage.getItem("school"));
+    const school = getStoredSchool();
+    const schoolLogo = getUploadUrl(school?.upload_logo);
 
     const printWindow = window.open("", "_blank");
 
@@ -357,12 +383,12 @@ function StudentList() {
             </div>
 
             <div style="display:flex; align-items:center; margin-top:10px;">
-              <img src="${school?.upload_logo || ""}" style="height:60px; width:60px;" />
-              
+              ${schoolLogo ? `<img src="${schoolLogo}" style="height:60px; width:60px; object-fit:contain;" />` : ""}
+          
               <div style="flex:1; text-align:center;">
                 <h2 style="margin:0;">${school?.school_name || ""}</h2>
                 <p style="margin:0; font-size:12px;">${school?.address || ""}</p>
-                <p style="margin:0; font-size:12px;">Contact: ${school?.phone || ""}</p>
+                <p style="margin:0; font-size:12px;">Contact: ${school?.phone || school?.mobile_no || school?.helpLine_no || ""}</p>
               </div>
             </div>
           </div>
@@ -921,7 +947,8 @@ function StudentList() {
               ) : (
                 currentData.map((item, index) => (
                   <tr key={index} className="bg-white border-t hover:bg-gray-100 ">
-                    <td className="p-2">{index + 1}</td>
+                    
+                    <td className="px-2 md:px-4 py-2 whitespace-nowrap">{(currentPage - 1) * itemsPerPage + index + 1}</td>
 
                     <td className="p-2 whitespace-nowrap">
                       {" "}
@@ -1405,4 +1432,3 @@ function StudentList() {
 }
 
 export default StudentList;
-

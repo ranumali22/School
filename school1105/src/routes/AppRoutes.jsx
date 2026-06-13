@@ -2,12 +2,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SuperAdminLayout from "../Component/layout/SuperAdminLayout";
 import SchoolList from "../pages/school/SchoolList";
 
+import StaffAddClassTest from "../pages/staff/StaffAddClassTest";
+import StaffClassTestTable from "../pages/staff/StaffClassTestTable";
+import StaffMainExamTable from "../pages/staff/StaffMainExamTable";
+import StaffAddMainExamMarks from "../pages/staff/StaffAddMainExamMarks";
+
 import Layout from "../Component/layout/Layout";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Login from "../pages/auth/login";
 import StudentForm from "../pages/student/StudentForm";
 import StudentList from "../pages/student/StudentsList";
-// import StudentDashboard from "../pages/student/StudentDashboard";
 
 import StudentLayout from "../Component/layout/StudentLayout";
 import StaffAdd from "../pages/staff/StaffAdd";
@@ -93,6 +97,9 @@ import StaffTimetable from "../pages/staff/StaffTimetable";
 import WorkUpload from "../pages/staff/workUpload";
 import StudentWork from "../pages/student/StudentWork";
 import Banner from "../pages/masters/Banner";
+import SuperAdminLogin from "../pages/auth/SuperAdminLogin";
+import StaffStudentAttendancetable from "../pages/staff/StaffStudentAtteddensTable";
+import StaffStudentAttendance from "../pages/staff/StaffStudentAttendance";
 
 const RoleBasedTimetable = () => {
   const role = (localStorage.getItem("authRole") || "").toLowerCase();
@@ -133,14 +140,7 @@ const AppRoutes = () => {
             </SuperAdminLayout>
           }
         />
-        <Route
-          path="/Super-Admin"
-          element={
-            <SuperAdminLayout>
-              <StudentsDashboad />
-            </SuperAdminLayout>
-          }
-        />
+
         <Route
           path="/School_List"
           element={
@@ -246,7 +246,56 @@ const AppRoutes = () => {
             </StaffLayout>
           }
         />
+        <Route
+          path="/staff-student-attendance-table"
+          element={
+            <StaffLayout>
+              <StaffStudentAttendancetable />
+            </StaffLayout>
+          }
+        />
+        <Route
+          path="/staff-student-attendance"
+          element={
+            <StaffLayout>
+              <StaffStudentAttendance />
+            </StaffLayout>
+          }
+        />
 
+
+        <Route
+          path="/staff-addclass-test"
+          element={
+            <StaffLayout>
+              <StaffAddClassTest />
+            </StaffLayout>
+          }
+        />
+        <Route
+          path="/staff-classtest-table"
+          element={
+            <StaffLayout>
+              <StaffClassTestTable />
+            </StaffLayout>
+          }
+        />
+        <Route
+          path="staff-addmain-exam"
+          element={
+            <StaffLayout>
+              <StaffAddMainExamMarks />
+            </StaffLayout>
+          }
+        />
+        <Route
+          path="staff-exam-table"
+          element={
+            <StaffLayout>
+              <StaffMainExamTable />
+            </StaffLayout>
+          }
+        />
         <Route path="/timetable" element={<RoleBasedTimetable />} />
 
         {/* Staff Dashboard */}
@@ -297,8 +346,16 @@ const AppRoutes = () => {
         <Route path="/register-admin" element={<AdminRegister />} />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        {/* Login Page */}
         <Route path="/" element={<Login />} />
+
+
+        <Route
+          path="/superadmin"
+          element={
+            <SuperAdminLogin />
+          }
+        />
+
         <Route
           path="/dashboard"
           element={

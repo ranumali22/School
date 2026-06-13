@@ -89,48 +89,52 @@ function StudentDetailReport() {
             .then((res) => res.json())
             .then((data) => {
                 console.log("API DATA 👉", data);
+
                 if (data.success) {
-                    const formatted = data.row.map((item, index) => ({
-                        id: item.id,
-                        sNo: index + 1,
-                        srId: item.student_ids,
-                        srNo: item.registerNo,
-                        stu_prefix: item.stu_prefix,
-                        class: item.section_class,
-                        classId: item.registerClass,
-                        name: item.studentName,
-                        fatherName: item.fatherName,
-                        motherName: item.motherName,
-                        primaryNo: item.primaryNo,
-                        secondaryNo: item.secondaryNo,
-                        email: item.email,
-                        dob: item.dob,
-                        bloodgroup: item.bloodgroup,
-                        rte: item.rte,
-                        gender: item.gender,
-                        nationality: item.nationality,
-                        category: item.category,
-                        religion: item.religion,
-                        currentAddress: item.currentAddress,
-                        currentCity: item.currentCity,
-                        currentState: item.currentState,
-                        currentPinCode: item.currentPinCode,
-                        permanentAddress: item.permanentAddress,
-                        permanentCity: item.permanentCity,
-                        permanentState: item.permanentState,
-                        permanentPinCode: item.permanentPinCode,
-                        medium: item.medium,
-                        registrationEnrollNo: item.registrationEnrollNo,
-                        registerAdmissionDate: item.registerAdmissionDate,
-                        previousSchool: item.previousSchoolName,
-                        previousClass: item.previousClass,
-                        previousSrNo: item.previousSrNo,
-                        loginId: item.loginid,
-                        password: item.password,
-                        busRoute: item.busRoute,
-                        busStand: item.busStand,
-                        busFare: item.busFare,
-                    }));
+
+                    const formatted = data.row
+                        .filter((item) => item.status?.toLowerCase() === "active" || item.status === "Active")
+                        .map((item, index) => ({
+                            id: item.id,
+                            sNo: index + 1,
+                            srId: item.student_ids,
+                            srNo: item.registerNo,
+                            stu_prefix: item.stu_prefix,
+                            class: item.section_class,
+                            classId: item.registerClass,
+                            name: item.studentName,
+                            fatherName: item.fatherName,
+                            motherName: item.motherName,
+                            primaryNo: item.primaryNo,
+                            secondaryNo: item.secondaryNo,
+                            email: item.email,
+                            dob: item.dob,
+                            bloodgroup: item.bloodgroup,
+                            rte: item.rte,
+                            gender: item.gender,
+                            nationality: item.nationality,
+                            category: item.category,
+                            religion: item.religion,
+                            currentAddress: item.currentAddress,
+                            currentCity: item.currentCity,
+                            currentState: item.currentState,
+                            currentPinCode: item.currentPinCode,
+                            permanentAddress: item.permanentAddress,
+                            permanentCity: item.permanentCity,
+                            permanentState: item.permanentState,
+                            permanentPinCode: item.permanentPinCode,
+                            medium: item.medium,
+                            registrationEnrollNo: item.registrationEnrollNo,
+                            registerAdmissionDate: item.registerAdmissionDate,
+                            previousSchool: item.previousSchoolName,
+                            previousClass: item.previousClass,
+                            previousSrNo: item.previousSrNo,
+                            loginId: item.loginid,
+                            password: item.password,
+                            busRoute: item.busRoute,
+                            busStand: item.busStand,
+                            busFare: item.busFare,
+                        }));
 
                     setStudents(formatted);
                 }
@@ -155,14 +159,14 @@ function StudentDetailReport() {
                     const activeSorted = data.row
                         .filter((item) => item.status === "Active")
                         .sort((a, b) => {
-  const diff = (a.display_order || 0) - (b.display_order || 0);
-  if (diff === 0) {
-    const nameA = (a.class_name || a.className || a.name || a.category || a.gender || a.medium || a.nationality || a.religion || a.busRoute_name || a.busStand_name || a.subject_name || a.department || a.designation || a.shift || a.title || "") + (a.section ? " " + a.section : "");
-    const nameB = (b.class_name || b.className || b.name || b.category || b.gender || b.medium || b.nationality || b.religion || b.busRoute_name || b.busStand_name || b.subject_name || b.department || b.designation || b.shift || b.title || "") + (b.section ? " " + b.section : "");
-    return String(nameA).localeCompare(String(nameB));
-  }
-  return diff;
-});
+                            const diff = (a.display_order || 0) - (b.display_order || 0);
+                            if (diff === 0) {
+                                const nameA = (a.class_name || a.className || a.name || a.category || a.gender || a.medium || a.nationality || a.religion || a.busRoute_name || a.busStand_name || a.subject_name || a.department || a.designation || a.shift || a.title || "") + (a.section ? " " + a.section : "");
+                                const nameB = (b.class_name || b.className || b.name || b.category || b.gender || b.medium || b.nationality || b.religion || b.busRoute_name || b.busStand_name || b.subject_name || b.department || b.designation || b.shift || b.title || "") + (b.section ? " " + b.section : "");
+                                return String(nameA).localeCompare(String(nameB));
+                            }
+                            return diff;
+                        });
 
                     setSectionList(activeSorted);
                     const uniqueClasses = [
@@ -253,7 +257,7 @@ function StudentDetailReport() {
         setCurrentPage,
         itemsPerPage,
         changeItemsPerPage,
-    } = usePagination(searchStudents);
+    } = usePagination(searchStudents, 100);
 
 
     const handleFieldChange = (key) => {

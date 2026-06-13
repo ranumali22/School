@@ -1,5 +1,9 @@
 const { create, getAll, update } = require("../model/school_account");
 
+const sharp = require("sharp");
+const fs = require("fs");
+const path = require("path");
+
 const formatMobileNumber = (number) => {
   if (!number) return null;
   let s = String(number).trim().replace(/\s+/g, "");
@@ -49,6 +53,12 @@ exports.register_school = async (req, res) => {
           .status(400)
           .json({ success: false, message: "Password is required" });
       }
+      if (req.body.password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "Password must be at least 6 characters long",
+        });
+      }
 
       const { email, mobile_no, username } = req.body;
       let email1 = await getAll("school_account", "*", { email: email }, "1");
@@ -70,9 +80,12 @@ exports.register_school = async (req, res) => {
         res.json({ success: false, message: "mobile is already exits" });
       } else if (username1.length > 0) {
         res.json({ success: false, message: "username is already exits" });
-        return res.json({ success: false, message: "username is already exits" });
+        return res.json({
+          success: false,
+          message: "username is already exits",
+        });
       } else {
-        const { school_name } = req.body
+        const { school_name } = req.body;
         let school_prefix = school_name.slice(0, 4).trim();
         let data = { ...req.body, school_prefix };
 
@@ -80,18 +93,67 @@ exports.register_school = async (req, res) => {
         delete data.logoPreview;
         delete data.logoFile;
 
+        // if (req.file) {
+        //   const folderName = school_name
+        //     .replace(/[^a-z0-9]/gi, "_")
+        //     .toLowerCase();
+        //   data.upload_logo = `school_logos/${folderName}/${req.file.filename}`;
+        // }
+
         if (req.file) {
-          const folderName = school_name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-          data.upload_logo = `school_logos/${folderName}/${req.file.filename}`;
+          const folderName = school_name
+            .replace(/[^a-z0-9]/gi, "_")
+            .toLowerCase();
+
+          const uploadDir = path.join(
+            __dirname,
+            "../uploads/school_logos",
+            folderName
+          );
+
+          if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+          }
+
+          const fileName = Date.now() + ".jpg";
+          const outputPath = path.join(uploadDir, fileName);
+
+          let quality = 80;
+          let buffer;
+
+          do {
+            buffer = await sharp(req.file.buffer)
+              .resize({
+                width: 800,
+                withoutEnlargement: true,
+              })
+              .jpeg({ quality })
+              .toBuffer();
+
+            quality -= 5;
+          } while (buffer.length > 100 * 1024 && quality > 10);
+
+          fs.writeFileSync(outputPath, buffer);
+
+          data.upload_logo = `school_logos/${folderName}/${fileName}`;
         }
 
         if (create("school_account", data)) {
-          return res.json({ success: true, message: "register school successfully" });
+          return res.json({
+            success: true,
+            message: "register school successfully",
+          });
         }
-        return res.json({ success: false, message: "register school not done " });
+        return res.json({
+          success: false,
+          message: "register school not done ",
+        });
       }
     }
-    return res.json({ success: false, message: "Other request type:" + req.method });
+    return res.json({
+      success: false,
+      message: "Other request type:" + req.method,
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -101,7 +163,11 @@ exports.all_school = async (req, res) => {
   try {
     let rows = await getAll("school_account");
     if (rows) {
-      return res.json({ success: true, message: "all school data ", row: rows });
+      return res.json({
+        success: true,
+        message: "all school data ",
+        row: rows,
+      });
     }
     return res.json({ success: false, message: "school not done " });
   } catch (error) {
@@ -114,7 +180,11 @@ exports.profile_school = async (req, res) => {
     const id = req.params.id;
     let rows = await getAll("school_account", "*", { id: id });
     if (rows) {
-      return res.json({ success: true, message: "profile school data ", row: rows });
+      return res.json({
+        success: true,
+        message: "profile school data ",
+        row: rows,
+      });
     }
     return res.json({ success: false, message: "school profile not get " });
   } catch (error) {
@@ -192,12 +262,10 @@ exports.forget_password_school = async (req, res) => {
     const { email, mobile_no } = req.body;
 
     if (!mobile_no && !email) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Mobile number or email is required",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number or email is required",
+      });
     }
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -275,7 +343,6 @@ function parseDate(dateStr) {
     return dateStr;
   }
 
-
   if (typeof dateStr !== "string") {
     console.error("Invalid date:", dateStr);
     return new Date("Invalid");
@@ -323,7 +390,8 @@ exports.login_school = async (req, res) => {
       if (rows[0]["delete_status"] === "delete") {
         return res.json({
           success: false,
-          message: "This school account is inactive. Please contact the administrator. ❌",
+          message:
+            "This school account is inactive. Please contact the administrator. ❌",
         });
       }
 
@@ -374,7 +442,6 @@ exports.login_school = async (req, res) => {
     }
     res.json({ success: false, message: "Other request type:" + req.method });
   } catch (error) {
-
     return res.json({ success: false, message: error.message });
   }
 };
@@ -385,17 +452,61 @@ exports.update_school = async (req, res) => {
     const rawData = req.body;
     const data = {};
 
-    Object.keys(rawData).forEach(key => {
-          if (['upload_type', 'id', 'logoPreview', 'logoFile'].includes(key)) return;
+    Object.keys(rawData).forEach((key) => {
+      if (["upload_type", "id", "logoPreview", "logoFile"].includes(key))
+        return;
 
-      if (typeof rawData[key] === 'string' || typeof rawData[key] === 'number') {
+      if (
+        typeof rawData[key] === "string" ||
+        typeof rawData[key] === "number"
+      ) {
         data[key] = rawData[key];
       }
     });
 
+    // if (req.file) {
+    //   const schoolName = (data.school_name || "default")
+    //     .replace(/[^a-z0-9]/gi, "_")
+    //     .toLowerCase();
+    //   data.upload_logo = `school_logos/${schoolName}/${req.file.filename}`;
+    // }
+
     if (req.file) {
-      const schoolName = (data.school_name || "default").replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      data.upload_logo = `school_logos/${schoolName}/${req.file.filename}`;
+      const schoolName = (data.school_name || "default")
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase();
+
+      const uploadDir = path.join(
+        __dirname,
+        "../uploads/school_logos",
+        schoolName
+      );
+
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const fileName = Date.now() + ".jpg";
+      const outputPath = path.join(uploadDir, fileName);
+
+      let quality = 80;
+      let buffer;
+
+      do {
+        buffer = await sharp(req.file.buffer)
+          .resize({
+            width: 800,
+            withoutEnlargement: true,
+          })
+          .jpeg({ quality })
+          .toBuffer();
+
+        quality -= 5;
+      } while (buffer.length > 100 * 1024 && quality > 10);
+
+      fs.writeFileSync(outputPath, buffer);
+
+      data.upload_logo = `school_logos/${schoolName}/${fileName}`;
     }
 
     console.log("Updating School ID:", id, "with data:", data);
@@ -563,18 +674,22 @@ exports.save_fcm_token = async (req, res) => {
     if (!school_id || !user_id || !role || !fcm_token) {
       return res.json({ success: false, message: "Missing required fields" });
     }
-    let existing = await getAll("user_device_tokens", "*", { school_id, user_id, role, fcm_token });
+    let existing = await getAll("user_device_tokens", "*", {
+      school_id,
+      user_id,
+      role,
+      fcm_token,
+    });
 
     if (existing.length > 0) {
       return res.json({ success: true, message: "Token already registered" });
     }
 
-
     await create("user_device_tokens", {
       school_id,
       user_id,
       role,
-      fcm_token
+      fcm_token,
     });
 
     // 🔥 ALSO Update the main user table (students or employee)
@@ -585,9 +700,7 @@ exports.save_fcm_token = async (req, res) => {
       await update("employee", { fcm_token }, user_id);
     }
 
-
     console.log("user token save in device");
-
 
     return res.json({ success: true, message: "Token saved successfully" });
   } catch (error) {
@@ -601,16 +714,22 @@ exports.check_school_status = async (req, res) => {
     if (!school_id) {
       return res.json({ success: false, message: "School ID is required" });
     }
-    let rows = await getAll("school_account", "delete_status", { id: school_id });
+    let rows = await getAll("school_account", "delete_status", {
+      id: school_id,
+    });
     if (rows && rows.length > 0) {
       const is_active = rows[0].delete_status !== "delete";
       return res.json({
         success: true,
         active: is_active,
-        is_inactive: !is_active
+        is_inactive: !is_active,
       });
     }
-    return res.json({ success: false, message: "School not found", is_inactive: true });
+    return res.json({
+      success: false,
+      message: "School not found",
+      is_inactive: true,
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

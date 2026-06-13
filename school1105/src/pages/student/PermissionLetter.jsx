@@ -6,7 +6,6 @@ import { Printer, Search } from "lucide-react";
 const PermissionLetter = () => {
     const [sectionList, setSectionList] = useState([]);
     const [examList, setExamList] = useState([]);
-    const [students, setStudents] = useState([]);
     const [filteredStudents, setFilteredStudents] = useState([]);
     const [timetable, setTimetable] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -67,6 +66,9 @@ const PermissionLetter = () => {
             if (stuData.success && timeData.success) {
                 let list = stuData.row || stuData.rows || [];
 
+                // Only active students should receive permission letters.
+                list = list.filter((s) => String(s.status || "").toLowerCase() === "active");
+
                 // Filter by Class
                 list = list.filter(s => s.registerClass == form.class_id);
 
@@ -95,7 +97,9 @@ const PermissionLetter = () => {
     };
 
     const handlePrint = () => {
-        window.print();
+        setTimeout(() => {
+            window.print();
+        }, 100);
     };
 
     const getDayName = (dateStr) => {
@@ -117,24 +121,75 @@ const PermissionLetter = () => {
     };
 
     return (
-        <div className="bg-white rounded-t-2xl max-w-full p-4 min-h-[80vh]">
+        <div className="permission-print-page bg-white rounded-t-2xl max-w-full p-4 min-h-[80vh]">
             <style>{`
                 @media print {
+                    html,
+                    body,
+                    #root {
+                        width: 100% !important;
+                        min-width: 100% !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                        background: white !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        font-family: Arial, sans-serif !important;
+                    }
+
+                    body * {
+                        visibility: hidden !important;
+                    }
+
+                    .permission-print-page,
+                    .permission-print-page * {
+                        visibility: visible !important;
+                    }
+
+                    .permission-print-page {
+                        position: absolute !important;
+                        inset: 0 auto auto 0 !important;
+                        width: 100% !important;
+                        max-width: none !important;
+                        min-height: auto !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border-radius: 0 !important;
+                        background: white !important;
+                    }
+
                     .no-print { display: none !important; }
-                    body { background: white !important; margin: 0 !important; padding: 0 !important; font-family: 'Inter', sans-serif !important; }
-                    .print-area { 
+
+                    .print-area {
                         display: block !important;
                         width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
-                    .permission-card { 
-                        break-inside: avoid !important;
+
+                    .permission-card {
+                        break-inside: avoid-page !important;
+                        page-break-inside: avoid !important;
+                        page-break-after: always !important;
                         border: 1px solid #ccc !important;
-                        margin-bottom: 20px !important;
-                        padding: 15px !important;
+                        border-radius: 0 !important;
+                        margin: 0 0 8mm 0 !important;
+                        padding: 5mm !important;
                         width: 100% !important;
+                        max-width: none !important;
                         box-shadow: none !important;
                     }
-                    @page { size: portrait; margin: 10mm; }
+
+                    .permission-card:last-child {
+                        page-break-after: auto !important;
+                    }
+
+                    .permission-card table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                    }
+
+                    @page { size: A4 portrait; margin: 8mm; }
                 }
             `}</style>
 
@@ -351,13 +406,13 @@ const PermissionLetter = () => {
             </div>
 
             {loading && (
-                <div className="flex justify-center items-center py-20">
+                <div className="no-print flex justify-center items-center py-20">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0860C4]"></div>
                 </div>
             )}
 
             {!loading && filteredStudents.length === 0 && (
-                <div className="text-center py-20 text-gray-400 italic">
+                <div className="no-print text-center py-20 text-gray-400 italic">
                     Select Class and Exam, then click "Find" to generate permission letters.
                 </div>
             )}

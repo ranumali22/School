@@ -252,7 +252,7 @@ const StudentFeeAllot = () => {
         setCurrentPage,
         itemsPerPage,
         changeItemsPerPage
-    } = usePagination(searchStudents, 100);
+    } = usePagination(searchStudents, 10);
 
 
     if (showForm) {
@@ -406,8 +406,8 @@ const StudentFeeAllot = () => {
                                 return (
 
                                     <tr key={index} className="text-center border-t">
-                                        <td className="px-2 md:px-4 py-2 whitespace-nowrap">{index + 1}</td>
-                                        <td className="p-2 whitespace-nowrap">{student.student_ids}</td>
+                                        <td className="px-2 md:px-4 py-2 whitespace-nowrap">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                                        <td className="p-2 whitespace-nowrap">{student.stu_prefix}{student.student_ids}</td>
 
                                         {/* <td className="p-2 whitespace-nowrap">{student.srNo}</td> */}
 
